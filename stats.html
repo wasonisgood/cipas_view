@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIPAS 辦案績效時間序列統計</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #f4f7f6; font-family: "Inter", "Microsoft JhengHei", sans-serif; }
+        .stats-card { background: white; border-radius: 15px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+        .year-header { background: #2c3e50; color: white; padding: 1rem 1.5rem; border-radius: 10px 10px 0 0; cursor: pointer; transition: background 0.2s; }
+        .year-header:hover { background: #34495e; }
+        .month-cell { min-width: 40px; height: 40px; border: 1px solid #dee2e6; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; border-radius: 4px; position: relative; }
+        .has-data { cursor: pointer; }
+        .count-badge { position: absolute; top: -5px; right: -5px; font-size: 0.6rem; padding: 2px 5px; border-radius: 10px; }
+        .cat-tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-right: 5px; color: white; }
+        .bg-investigation { background-color: #6f42c1; }
+        .bg-hearing { background-color: #fd7e14; }
+        .bg-action { background-color: #dc3545; }
+        .bg-litigation { background-color: #0d6efd; }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="fw-bold mb-0 text-dark">辦案績效時間序列統計</h1>
+            <p class="text-muted">基於年度與月份的程序發動與處分強度分析</p>
+        </div>
+        <a href="dashboard.html" class="btn btn-outline-dark"><i class="bi bi-arrow-left me-1"></i> 返回組織監控</a>
+    </div>
+
+    <!-- 年度總覽圖表 -->
+    <div class="card stats-card p-4">
+        <h4 class="fw-bold mb-4"><i class="bi bi-graph-up me-2 text-primary"></i>年度程序發件趨勢</h4>
+        <div style="height: 300px;">
+            <canvas id="yearlyChart"></canvas>
+        </div>
+    </div>
+
+    <div id="timeline-container">
+        <!-- 年度資料將由 JS 填充 -->
+    </div>
+</div>
+
+<script src="cipas_full_data.js"></script>
+<script>
+    const allData = typeof cipasFullData !== 'undefined' ? cipasFullData : [];
+
+    // 1. 資料重組：按年份與月份分組
+    const timeMap = {}; // { 2023: { 06: [cases], total: 0 }, ... }
+    const catStats = { 
+        'investigations': '調查', 'hearings': '聽證', 
+        'administrative_actions': '處分', 'litigations': '訴訟' 
+    };
+
+    allData.forEach(item => {
+        // 取第一筆事件日期作為該程序的「發動日期」
+        const sortedEvents = [...item.events].sort((a,b) => new Date(a.date) - new Date(b.date));
+        if (sortedEvents.length === 0) return;
+        
+        const dateObj = new Date(sortedEvents[0].date);
+        const year = dateObj.getFullYear();
+        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+
+        if (isNaN(year)) return;
+
+        if (!timeMap[year]) {
+            timeMap[year] = { months: {}, total: 0, cats: { investigations: 0, hearings: 0, administrative_actions: 0, litigations: 0 } };
+        }
+        if (!timeMap[year].months[month]) timeMap[year].months[month] = [];
+        
+        timeMap[year].months[month].push(item);
+        timeMap[year].total++;
+        timeMap[year].cats[item.category_key]++;
+    });
+
+    const sortedYears = Object.keys(timeMap).sort((a, b) => b - a);
+
+    // 2. 渲染圖表
+    function initChart() {
+        const ctx = document.getElementById('yearlyChart').getContext('2d');
+        const reversedYears = [...sortedYears].reverse();
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: reversedYears,
+                datasets: [
+                    { label: '調查', data: reversedYears.map(y => timeMap[y].cats.investigations), backgroundColor: '#6f42c1' },
+                    { label: '聽證', data: reversedYears.map(y => timeMap[y].cats.hearings), backgroundColor: '#fd7e14' },
+                    { label: '行政處分', data: reversedYears.map(y => timeMap[y].cats.administrative_actions), backgroundColor: '#dc3545' },
+                    { label: '相關訴訟', data: reversedYears.map(y => timeMap[y].cats.litigations), backgroundColor: '#0d6efd' }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
+
+    // 3. 渲染年度月份面板
+    function renderTimeline() {
+        const container = document.getElementById('timeline-container');
+        sortedYears.forEach(year => {
+            const data = timeMap[year];
+            let html = `
+                <div class="card stats-card overflow-hidden">
+                    <div class="year-header d-flex justify-content-between align-items-center" onclick="toggleYear(${year})">
+                        <h3 class="fw-bold mb-0">${year} 年度</h3>
+                        <div class="d-flex gap-3">
+                            <span class="badge bg-purple-subtle text-white">調查 ${data.cats.investigations}</span>
+                            <span class="badge bg-warning-subtle text-white">聽證 ${data.cats.hearings}</span>
+                            <span class="badge bg-danger">處分 ${data.cats.administrative_actions}</span>
+                            <span class="badge bg-primary">訴訟 ${data.cats.litigations}</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4" id="year-content-${year}">
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-3 small fw-bold text-uppercase">月度案件熱力圖</h6>
+                            <div class="d-flex flex-wrap gap-2">
+            `;
+
+            for (let m = 1; m <= 12; m++) {
+                const monthStr = m.toString().padStart(2, '0');
+                const cases = data.months[monthStr] || [];
+                const intensity = cases.length > 0 ? (cases.length > 3 ? 1.0 : 0.4) : 0;
+                html += `
+                    <div class="month-cell ${cases.length > 0 ? 'has-data' : ''}" 
+                         style="background-color: rgba(13, 110, 253, ${intensity}); color: ${intensity > 0.5 ? 'white' : 'black'}"
+                         onclick="showMonthDetail(${year}, '${monthStr}')">
+                        ${m}月
+                        ${cases.length > 0 ? `<span class="count-badge bg-danger text-white">${cases.length}</span>` : ''}
+                    </div>
+                `;
+            }
+
+            html += `
+                            </div>
+                        </div>
+                        <div id="detail-${year}" class="mt-4" style="display: none;">
+                            <div class="border-top pt-3">
+                                <h6 class="fw-bold mb-3"><span id="detail-title-${year}"></span> 程序清單</h6>
+                                <div id="detail-list-${year}"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += html;
+        });
+    }
+
+    function showMonthDetail(year, month) {
+        const detailDiv = document.getElementById(`detail-${year}`);
+        const titleSpan = document.getElementById(`detail-title-${year}`);
+        const listDiv = document.getElementById(`detail-list-${year}`);
+        const cases = timeMap[year].months[month] || [];
+
+        titleSpan.innerText = `${year}年 ${parseInt(month)}月`;
+        listDiv.innerHTML = cases.map(c => {
+            let catColor = 'bg-investigation';
+            if (c.category_key === 'hearings') catColor = 'bg-hearing';
+            if (c.category_key === 'administrative_actions') catColor = 'bg-action';
+            if (c.category_key === 'litigations') catColor = 'bg-litigation';
+
+            return `
+                <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                    <div class="small">
+                        <span class="cat-tag ${catColor}">${c.category}</span>
+                        <span class="fw-bold">${c.title}</span>
+                    </div>
+                    <a href="dashboard.html#/case/${c.id}" class="btn btn-sm btn-link text-decoration-none p-0">查看 <i class="bi bi-chevron-right"></i></a>
+                </div>
+            `;
+        }).join('');
+        
+        detailDiv.style.display = 'block';
+    }
+
+    function toggleYear(year) {
+        const content = document.getElementById(`year-content-${year}`);
+        content.style.display = content.style.display === 'none' ? 'block' : 'none';
+    }
+
+    window.onload = () => {
+        initChart();
+        renderTimeline();
+    };
+</script>
+
+</body>
+</html>
