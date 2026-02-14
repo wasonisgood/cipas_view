@@ -55,7 +55,7 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "移轉、追徵"
+        "action": "調查進度"
       }
     ],
     "events": [
@@ -91,7 +91,7 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "移轉、追徵"
+        "action": "調查進度"
       }
     ],
     "events": [
@@ -127,7 +127,7 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "移轉、追徵"
+        "action": "調查進度"
       }
     ],
     "events": [
@@ -159,7 +159,13 @@ const cipasFullData = [
     "category_key": "investigations",
     "url": "https://www.cipas.gov.tw/investigations/15",
     "title": "社團法人中華救助總會案",
-    "analysis": [],
+    "analysis": [
+      {
+        "org_full": "社團法人中華救助總會",
+        "org_abbr": "",
+        "action": "調查進度"
+      }
+    ],
     "events": [
       {
         "date": "2019/07/23",
@@ -243,7 +249,7 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "移轉、追徵"
+        "action": "調查進度"
       }
     ],
     "events": [
@@ -329,7 +335,7 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "移轉、追徵"
+        "action": "調查進度"
       }
     ],
     "events": [
@@ -517,7 +523,13 @@ const cipasFullData = [
     "category_key": "investigations",
     "url": "https://www.cipas.gov.tw/investigations/2",
     "title": "中華民國婦女聯合會案",
-    "analysis": [],
+    "analysis": [
+      {
+        "org_full": "中華民國婦女聯合會",
+        "org_abbr": "",
+        "action": "調查進度"
+      }
+    ],
     "events": [
       {
         "date": "2017/03/28",
@@ -626,7 +638,7 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "移轉、追徵"
+        "action": "調查進度"
       }
     ],
     "events": [
@@ -668,7 +680,13 @@ const cipasFullData = [
     "category_key": "investigations",
     "url": "https://www.cipas.gov.tw/investigations/4",
     "title": "中國青年救國團案",
-    "analysis": [],
+    "analysis": [
+      {
+        "org_full": "社團法人中國青年救國團",
+        "org_abbr": "",
+        "action": "調查進度"
+      }
+    ],
     "events": [
       {
         "date": "2016/10/04",
@@ -883,7 +901,23 @@ const cipasFullData = [
     "category_key": "investigations",
     "url": "https://www.cipas.gov.tw/investigations/6",
     "title": "民族基金會、民權基金會及國家發展基金會等3基金會案",
-    "analysis": [],
+    "analysis": [
+      {
+        "org_full": "財團法人民族基金會",
+        "org_abbr": "",
+        "action": "調查進度"
+      },
+      {
+        "org_full": "財團法人民權基金會",
+        "org_abbr": "",
+        "action": "調查進度"
+      },
+      {
+        "org_full": "財團法人國家發展基金會",
+        "org_abbr": "",
+        "action": "調查進度"
+      }
+    ],
     "events": [
       {
         "date": "2016/11/25",
@@ -1033,7 +1067,13 @@ const cipasFullData = [
     "category_key": "investigations",
     "url": "https://www.cipas.gov.tw/investigations/7",
     "title": "民生建設基金會案",
-    "analysis": [],
+    "analysis": [
+      {
+        "org_full": "財團法人民生建設基金會",
+        "org_abbr": "",
+        "action": "調查進度"
+      }
+    ],
     "events": [
       {
         "date": "2016/11/15",
@@ -1098,7 +1138,13 @@ const cipasFullData = [
     "category_key": "investigations",
     "url": "https://www.cipas.gov.tw/investigations/9",
     "title": "中影股份有限公司案",
-    "analysis": [],
+    "analysis": [
+      {
+        "org_full": "中影股份有限公司",
+        "org_abbr": "",
+        "action": "調查進度"
+      }
+    ],
     "events": [
       {
         "date": "2016/11/22",
@@ -1208,7 +1254,13 @@ const cipasFullData = [
     "category_key": "investigations",
     "url": "https://www.cipas.gov.tw/investigations/5",
     "title": "中國廣播股份有限公司案",
-    "analysis": [],
+    "analysis": [
+      {
+        "org_full": "中國廣播股份有限公司",
+        "org_abbr": "",
+        "action": "調查進度"
+      }
+    ],
     "events": [
       {
         "date": "2016/11/22",
@@ -1288,7 +1340,13 @@ const cipasFullData = [
     "category_key": "investigations",
     "url": "https://www.cipas.gov.tw/investigations/8",
     "title": "欣裕台股份有限公司調查案",
-    "analysis": [],
+    "analysis": [
+      {
+        "org_full": "欣裕台股份有限公司",
+        "org_abbr": "",
+        "action": "調查進度"
+      }
+    ],
     "events": [
       {
         "date": "2016/08/31",
@@ -1383,7 +1441,13 @@ const cipasFullData = [
     "category_key": "investigations",
     "url": "https://www.cipas.gov.tw/investigations/10",
     "title": "中央投資股份有限公司案",
-    "analysis": [],
+    "analysis": [
+      {
+        "org_full": "中央投資股份有限公司",
+        "org_abbr": "",
+        "action": "調查進度"
+      }
+    ],
     "events": [
       {
         "date": "2016/08/31",
@@ -1594,7 +1658,7 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "移轉、追徵"
+        "action": "聽證程序"
       }
     ],
     "events": [
@@ -1645,7 +1709,7 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "移轉、追徵"
+        "action": "聽證程序"
       }
     ],
     "events": [
@@ -1701,7 +1765,7 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "移轉、追徵"
+        "action": "聽證程序"
       }
     ],
     "events": [
@@ -1753,7 +1817,13 @@ const cipasFullData = [
     "category_key": "hearings",
     "url": "https://www.cipas.gov.tw/hearings/16",
     "title": "社團法人中華救助總會案",
-    "analysis": [],
+    "analysis": [
+      {
+        "org_full": "社團法人中華救助總會",
+        "org_abbr": "",
+        "action": "聽證程序"
+      }
+    ],
     "events": [
       {
         "date": "2019/07/23",
@@ -1932,7 +2002,7 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "移轉、追徵"
+        "action": "聽證程序"
       }
     ],
     "events": [
@@ -2150,7 +2220,13 @@ const cipasFullData = [
     "category_key": "hearings",
     "url": "https://www.cipas.gov.tw/hearings/8",
     "title": "中華民國婦女聯合會案",
-    "analysis": [],
+    "analysis": [
+      {
+        "org_full": "中華民國婦女聯合會",
+        "org_abbr": "",
+        "action": "聽證程序"
+      }
+    ],
     "events": [
       {
         "date": "2017/03/28",
@@ -2294,7 +2370,7 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "移轉、追徵"
+        "action": "聽證程序"
       }
     ],
     "events": [
@@ -2336,7 +2412,13 @@ const cipasFullData = [
     "category_key": "hearings",
     "url": "https://www.cipas.gov.tw/hearings/6",
     "title": "中國青年救國團案",
-    "analysis": [],
+    "analysis": [
+      {
+        "org_full": "社團法人中國青年救國團",
+        "org_abbr": "",
+        "action": "聽證程序"
+      }
+    ],
     "events": [
       {
         "date": "2016/10/04",
@@ -2576,7 +2658,23 @@ const cipasFullData = [
     "category_key": "hearings",
     "url": "https://www.cipas.gov.tw/hearings/5",
     "title": "民族基金會、民權基金會及國家發展基金會等3基金會案",
-    "analysis": [],
+    "analysis": [
+      {
+        "org_full": "財團法人民族基金會",
+        "org_abbr": "",
+        "action": "聽證程序"
+      },
+      {
+        "org_full": "財團法人民權基金會",
+        "org_abbr": "",
+        "action": "聽證程序"
+      },
+      {
+        "org_full": "財團法人國家發展基金會",
+        "org_abbr": "",
+        "action": "聽證程序"
+      }
+    ],
     "events": [
       {
         "date": "2016/11/25",
@@ -2731,7 +2829,13 @@ const cipasFullData = [
     "category_key": "hearings",
     "url": "https://www.cipas.gov.tw/hearings/4",
     "title": "民生建設基金會案",
-    "analysis": [],
+    "analysis": [
+      {
+        "org_full": "財團法人民生建設基金會",
+        "org_abbr": "",
+        "action": "聽證程序"
+      }
+    ],
     "events": [
       {
         "date": "2016/11/25",
@@ -2796,7 +2900,13 @@ const cipasFullData = [
     "category_key": "hearings",
     "url": "https://www.cipas.gov.tw/hearings/3",
     "title": "中國廣播股份有限公司案",
-    "analysis": [],
+    "analysis": [
+      {
+        "org_full": "中國廣播股份有限公司",
+        "org_abbr": "",
+        "action": "聽證程序"
+      }
+    ],
     "events": [
       {
         "date": "2016/11/22",
@@ -2901,7 +3011,13 @@ const cipasFullData = [
     "category_key": "hearings",
     "url": "https://www.cipas.gov.tw/hearings/2",
     "title": "中影股份有限公司案",
-    "analysis": [],
+    "analysis": [
+      {
+        "org_full": "中影股份有限公司",
+        "org_abbr": "",
+        "action": "聽證程序"
+      }
+    ],
     "events": [
       {
         "date": "2016/11/22",
@@ -3021,7 +3137,18 @@ const cipasFullData = [
     "category_key": "hearings",
     "url": "https://www.cipas.gov.tw/hearings/1",
     "title": "中央投資股份有限公司及欣裕台股份有限公司案",
-    "analysis": [],
+    "analysis": [
+      {
+        "org_full": "中央投資股份有限公司",
+        "org_abbr": "",
+        "action": "聽證程序"
+      },
+      {
+        "org_full": "欣裕台股份有限公司",
+        "org_abbr": "",
+        "action": "聽證程序"
+      }
+    ],
     "events": [
       {
         "date": "2016/09/05",
@@ -3120,7 +3247,7 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "移轉"
+        "action": "行政處分"
       }
     ],
     "events": [
@@ -3146,7 +3273,7 @@ const cipasFullData = [
       {
         "org_full": "社團法人中國青年救國團",
         "org_abbr": "",
-        "action": "認定"
+        "action": "行政處分"
       }
     ],
     "events": [
@@ -3172,7 +3299,7 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "移轉、追徵"
+        "action": "行政處分"
       }
     ],
     "events": [
@@ -3234,7 +3361,7 @@ const cipasFullData = [
       {
         "org_full": "社團法人中華救助總會",
         "org_abbr": "",
-        "action": "認定、移轉、追徵"
+        "action": "行政處分"
       }
     ],
     "events": [
@@ -3260,7 +3387,7 @@ const cipasFullData = [
       {
         "org_full": "社團法人中華救助總會",
         "org_abbr": "",
-        "action": "認定"
+        "action": "行政處分"
       }
     ],
     "events": [
@@ -3291,7 +3418,7 @@ const cipasFullData = [
       {
         "org_full": "中國廣播股份有限公司",
         "org_abbr": "",
-        "action": "移轉、追徵"
+        "action": "行政處分"
       }
     ],
     "events": [
@@ -3317,12 +3444,12 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "移轉、追徵"
+        "action": "行政處分"
       },
       {
         "org_full": "坐落土地並已移轉他人",
         "org_abbr": "",
-        "action": "移轉、追徵"
+        "action": "行政處分"
       }
     ],
     "events": [
@@ -3353,7 +3480,7 @@ const cipasFullData = [
       {
         "org_full": "中華民國婦女聯合會",
         "org_abbr": "",
-        "action": "認定、移轉"
+        "action": "行政處分"
       }
     ],
     "events": [
@@ -3384,7 +3511,7 @@ const cipasFullData = [
       {
         "org_full": "中影股份有限公司",
         "org_abbr": "",
-        "action": "認定"
+        "action": "行政處分"
       }
     ],
     "events": [
@@ -3456,7 +3583,7 @@ const cipasFullData = [
       {
         "org_full": "社團法人中國青年救國團",
         "org_abbr": "",
-        "action": "認定"
+        "action": "行政處分"
       }
     ],
     "events": [
@@ -3487,12 +3614,12 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "認定、移轉、追徵"
+        "action": "行政處分"
       },
       {
         "org_full": "原地上建物並已移轉他人",
         "org_abbr": "",
-        "action": "認定、移轉、追徵"
+        "action": "行政處分"
       }
     ],
     "events": [
@@ -3523,17 +3650,17 @@ const cipasFullData = [
       {
         "org_full": "財團法人民族基金會",
         "org_abbr": "",
-        "action": "認定"
+        "action": "行政處分"
       },
       {
         "org_full": "財團法人民權基金會",
         "org_abbr": "",
-        "action": "認定"
+        "action": "行政處分"
       },
       {
         "org_full": "財團法人國家發展基金會",
         "org_abbr": "",
-        "action": "認定"
+        "action": "行政處分"
       }
     ],
     "events": [
@@ -3600,7 +3727,7 @@ const cipasFullData = [
       {
         "org_full": "中華民國婦女聯合會",
         "org_abbr": "",
-        "action": "認定"
+        "action": "行政處分"
       }
     ],
     "events": [
@@ -3631,7 +3758,7 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "移轉、追徵"
+        "action": "行政處分"
       }
     ],
     "events": [
@@ -3660,9 +3787,14 @@ const cipasFullData = [
     "title": "黨產處字第105005號處分：中國國民黨持有之中央投資及欣裕台股份有限公司股權移轉國有案",
     "analysis": [
       {
-        "org_full": "中國國民黨",
+        "org_full": "中央投資股份有限公司",
         "org_abbr": "",
-        "action": "移轉"
+        "action": "行政處分"
+      },
+      {
+        "org_full": "欣裕台股份有限公司",
+        "org_abbr": "",
+        "action": "行政處分"
       }
     ],
     "events": [
@@ -3781,12 +3913,12 @@ const cipasFullData = [
       {
         "org_full": "中央投資股份有限公司",
         "org_abbr": "",
-        "action": "認定"
+        "action": "行政處分"
       },
       {
         "org_full": "欣裕台股份有限公司",
         "org_abbr": "",
-        "action": "認定"
+        "action": "行政處分"
       }
     ],
     "events": [
@@ -3817,7 +3949,7 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "移轉"
+        "action": "相關訴訟"
       }
     ],
     "events": [
@@ -3848,7 +3980,7 @@ const cipasFullData = [
       {
         "org_full": "社團法人中國青年救國團",
         "org_abbr": "",
-        "action": "移轉、追徵"
+        "action": "相關訴訟"
       }
     ],
     "events": [
@@ -3887,9 +4019,9 @@ const cipasFullData = [
     "title": "追徵中國國民黨國家發展研究院座落土地之價額",
     "analysis": [
       {
-        "org_full": "中國國民黨",
+        "org_full": "財團法人國家發展基金會",
         "org_abbr": "",
-        "action": "追徵"
+        "action": "相關訴訟"
       }
     ],
     "events": [
@@ -3930,7 +4062,7 @@ const cipasFullData = [
       {
         "org_full": "中華民國婦女聯合會",
         "org_abbr": "",
-        "action": "移轉"
+        "action": "相關訴訟"
       }
     ],
     "events": [
@@ -3971,7 +4103,7 @@ const cipasFullData = [
       {
         "org_full": "社團法人中華救助總會",
         "org_abbr": "",
-        "action": "移轉、追徵"
+        "action": "相關訴訟"
       }
     ],
     "events": [
@@ -4022,7 +4154,7 @@ const cipasFullData = [
       {
         "org_full": "社團法人中華救助總會",
         "org_abbr": "",
-        "action": "認定"
+        "action": "相關訴訟"
       }
     ],
     "events": [
@@ -4088,7 +4220,7 @@ const cipasFullData = [
       {
         "org_full": "中國廣播股份有限公司",
         "org_abbr": "",
-        "action": "認定、移轉、追徵"
+        "action": "相關訴訟"
       }
     ],
     "events": [
@@ -4149,7 +4281,7 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "追徵"
+        "action": "相關訴訟"
       }
     ],
     "events": [
@@ -4210,7 +4342,7 @@ const cipasFullData = [
       {
         "org_full": "中華民國婦女聯合會",
         "org_abbr": "",
-        "action": "移轉"
+        "action": "相關訴訟"
       }
     ],
     "events": [
@@ -4251,7 +4383,7 @@ const cipasFullData = [
       {
         "org_full": "中影股份有限公司",
         "org_abbr": "",
-        "action": "認定"
+        "action": "相關訴訟"
       }
     ],
     "events": [
@@ -4338,7 +4470,7 @@ const cipasFullData = [
       {
         "org_full": "社團法人中國青年救國團",
         "org_abbr": "",
-        "action": "認定"
+        "action": "相關訴訟"
       }
     ],
     "events": [
@@ -4379,7 +4511,7 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "追徵"
+        "action": "相關訴訟"
       }
     ],
     "events": [
@@ -4428,19 +4560,9 @@ const cipasFullData = [
     "title": "認定財團法人民族、民權及國家發展基金會為中國國民黨附隨組織",
     "analysis": [
       {
-        "org_full": "財團法人民族基金會",
-        "org_abbr": "",
-        "action": "認定"
-      },
-      {
-        "org_full": "財團法人民權基金會",
-        "org_abbr": "",
-        "action": "認定"
-      },
-      {
         "org_full": "財團法人國家發展基金會",
         "org_abbr": "",
-        "action": "認定"
+        "action": "相關訴訟"
       }
     ],
     "events": [
@@ -4496,7 +4618,7 @@ const cipasFullData = [
       {
         "org_full": "中華民國婦女聯合會",
         "org_abbr": "",
-        "action": "認定"
+        "action": "相關訴訟"
       }
     ],
     "events": [
@@ -4577,7 +4699,7 @@ const cipasFullData = [
       {
         "org_full": "中國國民黨",
         "org_abbr": "",
-        "action": "追徵"
+        "action": "相關訴訟"
       }
     ],
     "events": [
@@ -4641,9 +4763,14 @@ const cipasFullData = [
     "title": "命中國國民黨將其所有之中央投資股份有限公司（中投）、欣裕台股份有限公司（欣裕台）股權，移轉國有",
     "analysis": [
       {
-        "org_full": "中國國民黨",
+        "org_full": "中央投資股份有限公司",
         "org_abbr": "",
-        "action": "移轉"
+        "action": "相關訴訟"
+      },
+      {
+        "org_full": "欣裕台股份有限公司",
+        "org_abbr": "",
+        "action": "相關訴訟"
       }
     ],
     "events": [
@@ -4870,12 +4997,12 @@ const cipasFullData = [
       {
         "org_full": "中央投資股份有限公司",
         "org_abbr": "",
-        "action": "認定"
+        "action": "相關訴訟"
       },
       {
         "org_full": "欣裕台股份有限公司",
         "org_abbr": "",
-        "action": "認定"
+        "action": "相關訴訟"
       }
     ],
     "events": [

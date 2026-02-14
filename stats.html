@@ -3,56 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CIPAS 程序阻塞與司法統計</title>
+    <title>CIPAS 終極績效監控看板</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
-        body { background-color: #f4f7f6; font-family: "Inter", "Microsoft JhengHei", sans-serif; }
-        .stats-card { background: white; border-radius: 15px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.05); padding: 1.5rem; margin-bottom: 2rem; }
-        .nav-year { position: fixed; right: 30px; top: 100px; }
-        .timeline-item { border-left: 3px solid #dee2e6; padding-left: 20px; position: relative; margin-bottom: 2rem; }
-        .timeline-item::before { content: ""; position: absolute; left: -9px; top: 0; width: 16px; height: 16px; border-radius: 50%; background: #0d6efd; border: 3px solid white; }
+        body { background-color: #f8f9fa; font-family: "Inter", "Microsoft JhengHei", sans-serif; }
+        .stats-card { background: white; border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 1.5rem; margin-bottom: 2rem; }
+        .kpi-card { border-top: 5px solid #0d6efd; transition: transform 0.2s; }
+        
+        /* 日曆表格化顯示 */
+        .year-row { border-bottom: 1px solid #dee2e6; padding: 15px 0; }
+        .year-label { font-size: 1.2rem; font-weight: 800; color: #343a40; min-width: 100px; }
+        .month-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+        .month-btn { width: 50px; height: 50px; border: 1px solid #dee2e6; border-radius: 8px; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; position: relative; }
+        .month-btn:hover { border-color: #0d6efd; background: #f0f7ff; }
+        .month-btn.active { background: #0d6efd; color: white; border-color: #0d6efd; }
+        .count-dot { position: absolute; top: -5px; right: -5px; background: #dc3545; color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 10px; font-weight: bold; }
+
+        /* 時間軸 */
+        .log-container { max-height: 800px; overflow-y: auto; padding-right: 10px; }
+        .log-item { border-left: 3px solid #dee2e6; padding-left: 15px; position: relative; margin-bottom: 1.5rem; }
+        .log-item::before { content: ""; position: absolute; left: -8px; top: 0; width: 13px; height: 13px; border-radius: 50%; background: #0d6efd; border: 2px solid white; }
         .court-win { border-left-color: #198754; }
         .court-lose { border-left-color: #dc3545; }
-        .blocking-list { max-height: 400px; overflow-y: auto; }
-        .blocking-item { padding: 10px; border-bottom: 1px solid #eee; transition: background 0.2s; cursor: pointer; }
-        .blocking-item:hover { background: #f8f9fa; }
+        .desc-box { font-size: 0.8rem; background: #f1f3f5; padding: 8px; border-radius: 5px; margin-top: 5px; color: #495057; white-space: pre-wrap; }
+        
+        .search-container { position: relative; max-width: 400px; }
+        .search-input { border-radius: 20px; padding-left: 40px; }
+        .search-icon { position: absolute; left: 15px; top: 10px; color: #6c757d; }
     </style>
 </head>
 <body>
 
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-5">
-        <h1 class="fw-bold"><i class="bi bi-bar-chart-line me-2"></i>程序阻塞與司法統計</h1>
-        <a href="dashboard.html" class="btn btn-outline-dark">返回組織流水線</a>
+<div class="container-fluid py-4 px-lg-5">
+    <!-- 導航與搜尋 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-0">CIPAS 終極績效監控看板</h1>
+            <p class="text-muted small">年度統計、司法勝率、程序阻塞與深度日誌一站式呈現</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <div class="search-container">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" id="globalSearch" class="form-control search-input" placeholder="搜尋組織、標題或主文..." onkeyup="handleFilter()">
+            </div>
+            <a href="dashboard.html" class="btn btn-dark"><i class="bi bi-diagram-3 me-2"></i> 流水線模式</a>
+        </div>
     </div>
 
-    <!-- 頂部統計 KPI -->
-    <div class="row g-4 mb-5" id="kpi-row"></div>
+    <!-- 績效 KPI -->
+    <div id="kpi-row" class="row g-4 mb-4"></div>
 
     <div class="row">
-        <!-- 左側：程序阻塞分析 -->
-        <div class="col-lg-5">
+        <!-- 左欄：年度日曆與阻塞分析 -->
+        <div class="col-lg-6">
             <div class="stats-card">
-                <h5 class="fw-bold mb-3"><i class="bi bi-hourglass-split me-2 text-warning"></i>程序阻塞分析</h5>
-                <p class="text-muted small">識別哪些組織目前「僅有前期程序」而無行政處分</p>
-                
-                <ul class="nav nav-tabs mb-3" id="blockTab" role="tablist">
-                    <li class="nav-item"><button class="nav-link active small" data-bs-toggle="tab" data-bs-target="#only-invest">僅調查案</button></li>
-                    <li class="nav-item"><button class="nav-link small" data-bs-toggle="tab" data-bs-target="#only-hearing">僅聽證案</button></li>
+                <h5 class="fw-bold mb-4"><i class="bi bi-calendar3 me-2 text-primary"></i>年度月份發案統計 (點擊月份可過濾日誌)</h5>
+                <div id="calendar-view"></div>
+            </div>
+
+            <div class="stats-card">
+                <h5 class="fw-bold mb-3"><i class="bi bi-hourglass-split me-2 text-warning"></i>程序阻塞分析 (尚未作成行政處分)</h5>
+                <ul class="nav nav-pills mb-3" id="blockTab">
+                    <li class="nav-item"><button class="nav-link active py-1 px-3 small" data-bs-toggle="pill" data-bs-target="#b-invest">僅調查案</button></li>
+                    <li class="nav-item"><button class="nav-link py-1 px-3 small" data-bs-toggle="pill" data-bs-target="#b-hearing">僅聽證案</button></li>
                 </ul>
-                <div class="tab-content blocking-list" id="blockTabContent">
-                    <div class="tab-pane fade show active" id="only-invest"></div>
-                    <div class="tab-pane fade" id="only-hearing"></div>
+                <div class="tab-content" id="blockTabContent" style="max-height: 300px; overflow-y: auto;">
+                    <div class="tab-pane fade show active" id="b-invest"></div>
+                    <div class="tab-pane fade" id="b-hearing"></div>
                 </div>
             </div>
         </div>
 
-        <!-- 右側：深度時間軸 -->
-        <div class="col-lg-7">
+        <!-- 右欄：深度日誌 -->
+        <div class="col-lg-6">
             <div class="stats-card">
-                <h5 class="fw-bold mb-4"><i class="bi bi-calendar3 me-2 text-primary"></i>全程序詳細時間日誌</h5>
-                <div id="full-timeline"></div>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-file-earmark-text me-2 text-info"></i>程序與司法裁定詳細日誌</h5>
+                    <button class="btn btn-sm btn-link text-decoration-none" onclick="clearFilters()">清除過濾</button>
+                </div>
+                <div id="log-view" class="log-container"></div>
             </div>
         </div>
     </div>
@@ -60,98 +90,151 @@
 
 <script src="cipas_full_data.js"></script>
 <script>
-    const allData = typeof cipasFullData !== 'undefined' ? cipasFullData : [];
-    
-    // 1. 程序阻塞分析
-    function analyzeBlocking() {
+    let currentYear = null;
+    let currentMonth = null;
+    let searchKeyword = "";
+    const rawData = typeof cipasFullData !== 'undefined' ? cipasFullData : [];
+
+    function clearFilters() {
+        currentYear = null; currentMonth = null; 
+        document.getElementById('globalSearch').value = "";
+        searchKeyword = "";
+        render();
+    }
+
+    function handleFilter() {
+        searchKeyword = document.getElementById('globalSearch').value.toLowerCase();
+        render();
+    }
+
+    function selectMonth(y, m) {
+        if (currentYear === y && currentMonth === m) {
+            currentYear = null; currentMonth = null;
+        } else {
+            currentYear = y; currentMonth = m;
+        }
+        render();
+    }
+
+    function render() {
         const orgs = {};
-        allData.forEach(item => {
-            item.analysis.forEach(org => {
-                const name = org.org_full;
-                if (!orgs[name]) orgs[name] = { invest: 0, hearing: 0, action: 0 };
+        const events = [];
+        const timeMap = {}; // { 2023: { 06: count } }
+
+        // 過濾邏輯
+        const filteredData = rawData.filter(item => {
+            const matchSearch = item.title.toLowerCase().includes(searchKeyword) || 
+                                item.analysis.some(a => a.org_full.toLowerCase().includes(searchKeyword));
+            return matchSearch;
+        });
+
+        filteredData.forEach(item => {
+            const orgNames = item.analysis.length > 0 ? item.analysis.map(a => a.org_full) : ["(未識別) " + item.title.substring(0,12)];
+            
+            // 組織統計 (供阻塞分析)
+            orgNames.forEach(name => {
+                if (!orgs[name]) orgs[name] = { name, invest:0, hearing:0, action:0 };
                 if (item.category_key === 'investigations') orgs[name].invest++;
                 if (item.category_key === 'hearings') orgs[name].hearing++;
                 if (item.category_key === 'administrative_actions') orgs[name].action++;
             });
-        });
 
-        const onlyInvest = Object.values(orgs).filter(o => o.invest > 0 && o.action === 0);
-        const onlyHearing = Object.values(orgs).filter(o => o.hearing > 0 && o.action === 0);
-
-        document.getElementById('only-invest').innerHTML = onlyInvest.map(o => `
-            <div class="blocking-item" onclick="location.href='dashboard.html#/org/${encodeURIComponent(o.name)}'">
-                <div class="fw-bold small">${o.name}</div>
-                <div class="text-muted" style="font-size: 0.7rem;">累積調查件數：${o.invest}</div>
-            </div>`).join('') || '<p class="text-muted p-3">無阻塞案件</p>';
-
-        document.getElementById('only-hearing').innerHTML = onlyHearing.map(o => `
-            <div class="blocking-item" onclick="location.href='dashboard.html#/org/${encodeURIComponent(o.name)}'">
-                <div class="fw-bold small">${o.name}</div>
-                <div class="text-muted" style="font-size: 0.7rem;">累積聽證件數：${o.hearing}</div>
-            </div>`).join('') || '<p class="text-muted p-3">無阻塞案件</p>';
-    }
-
-    // 2. 深度時間軸渲染
-    function renderTimeline() {
-        const events = [];
-        allData.forEach(item => {
+            // 事件展開
             item.events.forEach(e => {
-                const date = new Date(e.date);
-                if (isNaN(date.getTime())) return;
-                
-                let type = 'normal';
-                if (e.caption.includes('駁回') || e.caption.includes('不停止執行')) type = 'win';
-                if (e.caption.includes('撤銷') || e.caption.includes('停止執行')) type = 'lose';
+                const d = new Date(e.date);
+                if (isNaN(d.getTime())) return;
+                const y = d.getFullYear();
+                const m = (d.getMonth()+1).toString().padStart(2, '0');
 
-                events.push({
-                    date: date,
-                    dateStr: e.date,
-                    org: item.analysis[0]?.org_full || '未知組織',
-                    caption: e.caption,
-                    desc: e.description,
-                    type: type,
-                    caseId: item.id
-                });
+                if (!timeMap[y]) timeMap[y] = { total: 0 };
+                if (!timeMap[y][m]) timeMap[y][m] = 0;
+                timeMap[y][m]++;
+                timeMap[y].total++;
+
+                // 判定勝負
+                let outcome = 'normal';
+                if (e.caption.includes('駁回') || e.caption.includes('不停止執行')) outcome = 'win';
+                if (e.caption.includes('撤銷') || e.caption.includes('停止執行')) outcome = 'lose';
+
+                // 月份與年份過濾
+                const matchTime = (!currentYear || y === currentYear) && (!currentMonth || m === currentMonth);
+                
+                if (matchTime) {
+                    events.push({
+                        date: d, dateStr: e.date, y, m, org: orgNames[0],
+                        caption: e.caption, desc: e.description, outcome, id: item.id
+                    });
+                }
             });
         });
 
-        events.sort((a,b) => b.date - a.date);
-
-        document.getElementById('full-timeline').innerHTML = events.map(e => `
-            <div class="timeline-item ${e.type === 'win' ? 'court-win' : (e.type === 'lose' ? 'court-lose' : '')}">
-                <div class="d-flex justify-content-between">
-                    <span class="fw-bold small text-primary">${e.org}</span>
-                    <small class="text-muted">${e.dateStr}</small>
-                </div>
-                <div class="fw-bold mb-1" style="font-size: 0.85rem;">${e.caption}</div>
-                ${e.desc ? `<div class="text-muted x-small p-2 bg-light rounded mt-1" style="font-size: 0.75rem;">${e.desc}</div>` : ''}
-                <a href="dashboard.html#/case/${e.caseId}" class="btn btn-sm btn-link p-0 x-small mt-1 text-decoration-none" style="font-size: 0.7rem;">查看案件詳情 →</a>
-            </div>`).join('');
-    }
-
-    // 3. 頂部 KPI
-    function renderKPI() {
-        const stats = {
-            total: allData.length,
-            wins: 0,
-            actions: allData.filter(i => i.category_key === 'administrative_actions').length
-        };
-        allData.forEach(i => {
-            if (i.events.some(e => e.caption.includes('駁回') || e.caption.includes('不停止執行'))) stats.wins++;
-        });
-
+        // 1. 渲染 KPI
+        const totalCases = filteredData.length;
+        const winCount = events.filter(e => e.outcome === 'win').length;
+        const orderCount = filteredData.filter(i => i.category_key === 'administrative_actions').length;
         document.getElementById('kpi-row').innerHTML = `
-            <div class="col-md-4"><div class="stats-card text-center border-top border-primary border-4"><h3>${stats.total}</h3><small class="text-muted">總程序發動</small></div></div>
-            <div class="col-md-4"><div class="stats-card text-center border-top border-danger border-4"><h3>${stats.actions}</h3><small class="text-muted">成功產出處分</small></div></div>
-            <div class="col-md-4"><div class="stats-card text-center border-top border-success border-4"><h3>${stats.wins}</h3><small class="text-muted">法院判決勝訴</small></div></div>
+            <div class="col-md-4"><div class="stats-card kpi-card"><h3>${totalCases}</h3><small class="text-muted">總程序件數</small></div></div>
+            <div class="col-md-4"><div class="stats-card kpi-card" style="border-top-color:#dc3545"><h3>${orderCount}</h3><small class="text-muted">核心行政處分</small></div></div>
+            <div class="col-md-4"><div class="stats-card kpi-card" style="border-top-color:#198754"><h3>${winCount}</h3><small class="text-muted">法院勝訴裁定</small></div></div>
         `;
+
+        // 2. 渲染日曆
+        const years = Object.keys(timeMap).sort((a,b) => b-a);
+        let calHtml = "";
+        years.forEach(y => {
+            calHtml += `
+                <div class="year-row d-flex align-items-start">
+                    <div class="year-label">${y}</div>
+                    <div class="month-grid">
+                        ${Array.from({length:12}, (_,i) => {
+                            const ms = (i+1).toString().padStart(2, '0');
+                            const count = timeMap[y][ms] || 0;
+                            const active = currentYear === parseInt(y) && currentMonth === ms;
+                            return `
+                                <div class="month-btn ${active ? 'active' : ''}" onclick="selectMonth(${parseInt(y)}, '${ms}')">
+                                    <span style="font-size:0.8rem">${i+1}月</span>
+                                    ${count > 0 ? `<span class="count-dot">${count}</span>` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        });
+        document.getElementById('calendar-view').innerHTML = calHtml || '<p class="text-muted">查無時間資料</p>';
+
+        // 3. 渲染阻塞分析
+        const onlyInvest = Object.values(orgs).filter(o => o.invest > 0 && o.action === 0);
+        const onlyHearing = Object.values(orgs).filter(o => o.hearing > 0 && o.action === 0);
+        document.getElementById('b-invest').innerHTML = onlyInvest.map(o => `
+            <div class="p-2 border-bottom small d-flex justify-content-between align-items-center" onclick="jumpToOrg('${o.name}')" style="cursor:pointer">
+                <span>${o.name}</span><span class="badge bg-light text-dark">${o.invest} 調查</span>
+            </div>`).join('') || '<p class="text-muted p-3">無</p>';
+        document.getElementById('b-hearing').innerHTML = onlyHearing.map(o => `
+            <div class="p-2 border-bottom small d-flex justify-content-between align-items-center" onclick="jumpToOrg('${o.name}')" style="cursor:pointer">
+                <span>${o.name}</span><span class="badge bg-light text-dark">${o.hearing} 聽證</span>
+            </div>`).join('') || '<p class="text-muted p-3">無</p>';
+
+        // 4. 渲染日誌
+        events.sort((a,b) => b.date - a.date);
+        document.getElementById('log-view').innerHTML = events.map(e => `
+            <div class="log-item ${e.outcome==='win'?'court-win':(e.outcome==='lose'?'court-lose':'')}">
+                <div class="d-flex justify-content-between x-small text-muted mb-1">
+                    <span class="fw-bold text-primary">${e.org}</span><span>${e.dateStr}</span>
+                </div>
+                <div class="fw-bold small">${e.caption}</div>
+                ${e.desc ? `<div class="desc-box">${e.desc.substring(0, 200)}...</div>` : ''}
+                <div class="mt-2 text-end">
+                    <a href="dashboard.html#/case/${e.id}" class="btn btn-sm btn-link p-0 text-decoration-none" style="font-size:0.75rem">進入案件詳細頁 →</a>
+                </div>
+            </div>`).join('') || '<p class="text-muted p-4 text-center">查無進度資料，請嘗試清除過濾。</p>';
     }
 
-    window.onload = () => {
-        analyzeBlocking();
-        renderTimeline();
-        renderKPI();
-    };
+    function jumpToOrg(name) {
+        location.href = `dashboard.html#/org/${encodeURIComponent(name)}`;
+    }
+
+    window.onload = render;
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

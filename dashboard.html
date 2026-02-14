@@ -77,10 +77,41 @@
         const hash = window.location.hash || '#/';
         const container = document.getElementById('view-container');
         if (hash === '#/') renderKPI(container);
-        else if (hash.startsWith('#/org/')) renderOrgFlow(container, decodeURIComponent(hash.split('/').pop()));
+        else if (hash.startsWith('#/org/')) {
+            const rawParam = decodeURIComponent(hash.split('/').pop());
+            // 如果是未識別組織，進行模糊搜尋
+            if (rawParam.startsWith('(未識別)')) {
+                const keyword = rawParam.replace('(未識別) ', '').replace('...', '');
+                renderFuzzySearch(container, keyword);
+            } else {
+                renderOrgFlow(container, rawParam);
+            }
+        }
         else if (hash.startsWith('#/case/')) renderDetail(container, hash.split('/').pop());
         updateSidebar();
     };
+
+    function renderFuzzySearch(container, keyword) {
+        const matchedCases = allData.filter(c => c.title.includes(keyword));
+        container.innerHTML = `
+            <div class="mb-3"><a href="#/" class="text-decoration-none text-muted"><i class="bi bi-arrow-left"></i> 返回概覽</a></div>
+            <h1 class="fw-bold mb-4">搜尋結果：${keyword}</h1>
+            <div class="alert alert-info">提示：此為「未識別組織」的模糊比對結果。</div>
+            <div class="row g-4">
+                ${matchedCases.map(c => `
+                    <div class="col-md-6">
+                        <div class="case-card" onclick="location.hash='#/case/${c.id}'">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="status-badge bg-primary text-white">匹配案件</span>
+                                <small class="text-muted">${c.category}</small>
+                            </div>
+                            <div class="fw-bold">${c.title}</div>
+                        </div>
+                    </div>
+                `).join('') || '<p class="text-muted">查無匹配案件</p>'}
+            </div>
+        `;
+    }
 
     function renderKPI(container) {
         const totalLit = processedData.filter(i => i.category_key === 'litigations').length;
