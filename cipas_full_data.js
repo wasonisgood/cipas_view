@@ -1534,7 +1534,13 @@ const cipasFullData = [
     "category_key": "hearings",
     "url": "https://www.cipas.gov.tw/hearings/20",
     "title": "美齡樓是否為婦聯會不當取得財產之現存利益案",
-    "analysis": [],
+    "analysis": [
+      {
+        "org_full": "中華民國婦女聯合會",
+        "org_abbr": "",
+        "action": "聽證程序"
+      }
+    ],
     "events": [
       {
         "date": "2020/09/08",
@@ -3139,7 +3145,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "社團法人中國青年救國團",
-        "org_abbr": "救國團",
+        "org_abbr": "",
         "action": "認定"
       }
     ],
@@ -3227,7 +3233,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "社團法人中華救助總會",
-        "org_abbr": "救總",
+        "org_abbr": "",
         "action": "認定、移轉、追徵"
       }
     ],
@@ -3253,7 +3259,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "社團法人中華救助總會",
-        "org_abbr": "救總",
+        "org_abbr": "",
         "action": "認定"
       }
     ],
@@ -3284,7 +3290,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "中國廣播股份有限公司",
-        "org_abbr": "中廣",
+        "org_abbr": "",
         "action": "移轉、追徵"
       }
     ],
@@ -3346,7 +3352,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "中華民國婦女聯合會",
-        "org_abbr": "婦聯會",
+        "org_abbr": "",
         "action": "認定、移轉"
       }
     ],
@@ -3377,7 +3383,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "中影股份有限公司",
-        "org_abbr": "中影",
+        "org_abbr": "",
         "action": "認定"
       }
     ],
@@ -3413,7 +3419,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "中華民國婦女聯合會",
-        "org_abbr": "婦聯會",
+        "org_abbr": "",
         "action": "行政處分"
       }
     ],
@@ -3449,7 +3455,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "社團法人中國青年救國團",
-        "org_abbr": "救國團",
+        "org_abbr": "",
         "action": "認定"
       }
     ],
@@ -3593,7 +3599,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "中華民國婦女聯合會",
-        "org_abbr": "婦聯會",
+        "org_abbr": "",
         "action": "認定"
       }
     ],
@@ -3774,7 +3780,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "中央投資股份有限公司",
-        "org_abbr": "中投",
+        "org_abbr": "",
         "action": "認定"
       },
       {
@@ -3841,7 +3847,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "社團法人中國青年救國團",
-        "org_abbr": "救國團",
+        "org_abbr": "",
         "action": "移轉、追徵"
       }
     ],
@@ -3923,7 +3929,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "中華民國婦女聯合會",
-        "org_abbr": "婦聯會",
+        "org_abbr": "",
         "action": "移轉"
       }
     ],
@@ -3964,7 +3970,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "社團法人中華救助總會",
-        "org_abbr": "救總",
+        "org_abbr": "",
         "action": "移轉、追徵"
       }
     ],
@@ -4015,7 +4021,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "社團法人中華救助總會",
-        "org_abbr": "救總",
+        "org_abbr": "",
         "action": "認定"
       }
     ],
@@ -4081,7 +4087,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "中國廣播股份有限公司",
-        "org_abbr": "中廣",
+        "org_abbr": "",
         "action": "認定、移轉、追徵"
       }
     ],
@@ -4203,7 +4209,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "中華民國婦女聯合會",
-        "org_abbr": "婦聯會",
+        "org_abbr": "",
         "action": "移轉"
       }
     ],
@@ -4244,7 +4250,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "中影股份有限公司",
-        "org_abbr": "中影",
+        "org_abbr": "",
         "action": "認定"
       }
     ],
@@ -4295,7 +4301,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "中華民國婦女聯合會",
-        "org_abbr": "婦聯會",
+        "org_abbr": "",
         "action": "相關訴訟"
       }
     ],
@@ -4331,7 +4337,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "社團法人中國青年救國團",
-        "org_abbr": "救國團",
+        "org_abbr": "",
         "action": "認定"
       }
     ],
@@ -4489,7 +4495,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "中華民國婦女聯合會",
-        "org_abbr": "婦聯會",
+        "org_abbr": "",
         "action": "認定"
       }
     ],
@@ -4863,7 +4869,7 @@ const cipasFullData = [
     "analysis": [
       {
         "org_full": "中央投資股份有限公司",
-        "org_abbr": "中投",
+        "org_abbr": "",
         "action": "認定"
       },
       {
