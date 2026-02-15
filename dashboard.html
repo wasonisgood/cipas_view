@@ -13,15 +13,23 @@
         #main-content { margin-left: var(--sidebar-width); padding: 2rem; min-height: 100vh; }
         .glass-card { background: white; border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .kpi-card { border-left: 5px solid #0d6efd; transition: transform 0.2s; }
-        .phase-column { background: #f1f3f5; border-radius: 12px; padding: 1.25rem; height: 100%; border: 1px solid #e9ecef; }
-        .phase-title { font-weight: 800; color: #495057; margin-bottom: 1rem; font-size: 0.9rem; text-transform: uppercase; border-bottom: 2px solid #dee2e6; padding-bottom: 0.5rem; }
-        .group-header { font-size: 0.75rem; font-weight: bold; color: #0d6efd; margin: 1.2rem 0 0.4rem 0; padding-left: 5px; border-left: 3px solid #0d6efd; }
-        .case-card { background: white; border-radius: 8px; padding: 1rem; margin-bottom: 0.8rem; border: 1px solid #dee2e6; cursor: pointer; transition: all 0.2s; }
+        
+        .matter-section { background: white; border-radius: 16px; padding: 2rem; margin-bottom: 2.5rem; border: 1px solid #e9ecef; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .matter-title { font-weight: 800; color: #1a1d20; border-left: 5px solid #0d6efd; padding-left: 15px; margin-bottom: 1.5rem; }
+        .flow-container { display: flex; align-items: stretch; gap: 0.75rem; overflow-x: auto; padding-bottom: 1rem; }
+        .flow-stage { flex: 1; min-width: 240px; background: #f8f9fa; border-radius: 12px; padding: 1rem; border: 1px dashed #dee2e6; display: flex; flex-direction: column; }
+        .stage-label { font-size: 0.65rem; font-weight: 900; text-transform: uppercase; color: #6c757d; margin-bottom: 0.8rem; letter-spacing: 1px; display: flex; align-items: center; }
+        .stage-label i { font-size: 0.9rem; margin-right: 6px; }
+        .flow-arrow { display: flex; align-items: center; color: #dee2e6; font-size: 1.2rem; }
+        
+        .case-card { background: white; border-radius: 8px; padding: 0.8rem; margin-bottom: 0.6rem; border: 1px solid #dee2e6; cursor: pointer; transition: all 0.2s; position: relative; }
         .case-card:hover { border-color: #0d6efd; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-        .status-badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .status-badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
         .nav-link { color: #adb5bd; border-radius: 8px; margin-bottom: 0.4rem; }
         .nav-link:hover, .nav-link.active { background: #343a40; color: white; }
-        .event-desc { font-size: 0.85rem; color: #6c757d; margin-top: 0.5rem; background: #f8f9fa; padding: 8px; border-radius: 4px; border-left: 3px solid #dee2e6; white-space: pre-wrap; }
+        .protagonist-tag { font-size: 0.75rem; padding: 4px 12px; background: #f1f3f5; border: 1px solid #dee2e6; border-radius: 6px; color: #1a1d20; font-weight: 600; display: block; margin-bottom: 8px; text-align: right; }
+        .admin-action-link { color: #0d6efd; text-decoration: none; font-weight: bold; border-bottom: 1px dashed #0d6efd; }
+        .admin-action-link:hover { background: #e7f1ff; }
     </style>
 </head>
 <body>
@@ -39,107 +47,138 @@
 <script>
     const allData = typeof cipasFullData !== 'undefined' ? cipasFullData : [];
     
-    function getSubGroup(title) {
-        if (title.includes('中廣') || title.includes('中影') || title.includes('中投') || title.includes('欣裕台')) return '附隨組織與事業';
-        if (title.includes('黨部') || title.includes('辦公廳舍') || title.includes('大孝大樓') || title.includes('舊中央黨部')) return '黨部與地方不動產';
-        if (title.includes('土地') || title.includes('價額') || title.includes('追徵')) return '土地與價額追徵';
-        return '其他綜合類';
+    const OFFICIAL_ORGS = [
+        '中國國民黨', '中華民國婦女聯合會', '中國廣播股份有限公司', 
+        '中央投資股份有限公司', '欣裕台股份有限公司', '中影股份有限公司', 
+        '社團法人中國青年救國團', '中華救助總會', '財團法人民生建設基金會',
+        '財團法人民族基金會', '財團法人民權基金會', '財團法人國家發展基金會',
+        '欣光華股份有限公司', '光華投資股份有限公司'
+    ];
+
+    const nameNormalization = {
+        '婦聯會': '中華民國婦女聯合會',
+        '中華民國婦女聯合會': '中華民國婦女聯合會',
+        '中廣': '中國廣播股份有限公司',
+        '中國廣播公司': '中國廣播股份有限公司',
+        '中國廣播股份有限公司': '中國廣播股份有限公司',
+        '中投': '中央投資股份有限公司',
+        '中央投資公司': '中央投資股份有限公司',
+        '中央投資股份有限公司': '中央投資股份有限公司',
+        '欣裕台': '欣裕台股份有限公司',
+        '欣裕台公司': '欣裕台股份有限公司',
+        '欣裕台股份有限公司': '欣裕台股份有限公司',
+        '光華投資': '光華投資股份有限公司',
+        '光華投資公司': '光華投資股份有限公司',
+        '光華投資股份有限公司': '光華投資股份有限公司',
+        '國民黨': '中國國民黨',
+        '中國國民黨': '中國國民黨',
+        '救總': '中華救助總會',
+        '中華救助總會': '中華救助總會',
+        '救助總會': '中華救助總會'
+    };
+
+    function getMatterCategory(title) {
+        const t = title;
+        if (t.includes('美齡樓')) return '特定財產案：美齡樓';
+        if (t.includes('大孝大樓')) return '特定財產案：大孝大樓';
+        if (t.includes('國發院')) return '特定財產案：國發院土地';
+        if (t.includes('台中市黨部')) return '特定財產案：台中市黨部';
+        if (t.includes('罰鍰')) return '裁罰案件：違反黨產條例';
+        if (t.includes('附隨組織') || OFFICIAL_ORGS.some(org => t === org + '案' || t === org + '調查案') || (t.includes('中央投資') && t.includes('欣裕台') && !t.includes('股權'))) {
+            return '核心案件：附隨組織地位認定';
+        }
+        if (t.includes('移轉國有') || t.includes('不當取得財產') || t.includes('追徵') || t.includes('股權')) {
+            return '財產處分：不當取得財產移轉與追徵';
+        }
+        return '其他程序案件';
+    }
+
+    function analyzeLitigationStatus(events) {
+        if (!events || events.length === 0) return { label: '無進度', class: 'bg-secondary text-white', score: 0 };
+        const sorted = [...events].sort((a,b) => new Date(b.date) - new Date(a.date));
+        const latest = sorted[0];
+        const latestFull = (latest.caption + latest.description);
+        if (latestFull.includes('最高行政法院')) {
+            if (latestFull.includes('駁回') || latestFull.includes('確定')) return { label: '處分獲永久維持 (定讞)', class: 'bg-success text-white', score: 100 };
+            if (latestFull.includes('撤銷原處分')) return { label: '處分遭永久撤銷 (定讞)', class: 'bg-danger text-white', score: -100 };
+            if (latestFull.includes('發回') || latestFull.includes('更審')) return { label: '法院發回更審', class: 'bg-warning text-dark', score: 50 };
+        }
+        if (latest.caption.includes('提起上訴') && !latest.caption.includes('駁回')) return { label: '上訴審理中', class: 'bg-primary text-white', score: 40 };
+        if (latestFull.includes('原告之訴駁回')) return { label: '處分獲司法維持 (一審)', class: 'bg-success text-white', score: 80 };
+        if (latestFull.includes('原處分撤銷')) return { label: '處分遭司法撤銷 (一審)', class: 'bg-danger text-white', score: -80 };
+        return { label: '司法審理中', class: 'bg-primary text-white', score: 30 };
     }
 
     function analyzeItem(item) {
         let status = { label: '處理中', class: 'bg-secondary text-white', score: 0 };
-        const latest = [...item.events].sort((a,b) => new Date(b.date) - new Date(a.date))[0]?.caption || "";
-        
         if (item.category_key === 'litigations') {
-            if (latest.includes('駁回') || latest.includes('不停止執行')) status = { label: '勝訴/維持', class: 'bg-success text-white', score: 1 };
-            else if (latest.includes('撤銷') || latest.includes('停止執行')) status = { label: '遭挑戰', class: 'bg-danger text-white', score: -1 };
-            else status = { label: '法院審理', class: 'bg-primary text-white', score: 0 };
+            const litStatus = analyzeLitigationStatus(item.events);
+            if (litStatus.score >= 80) status = { label: '處分獲維持', class: 'bg-success text-white', score: 1 };
+            else if (litStatus.score < 0) status = { label: '效力受挫', class: 'bg-danger text-white', score: -1 };
+            else status = { label: '司法攻防中', class: 'bg-primary text-white', score: 0 };
         } else if (item.category_key === 'administrative_actions') {
-            status = { label: '已作成處分', class: 'bg-danger text-white', score: 1 };
+            status = { label: '處分已作成', class: 'bg-danger text-white', score: 1 };
         }
-        
-        const hasOrder = item.events.some(e => e.caption.includes('作成') && e.caption.includes('處分'));
-        const isRecognition = item.title.includes('認定') && (item.title.includes('附隨組織') || item.title.includes('為'));
-        
-        return { ...item, displayStatus: status, hasOrder, isRecognition, subGroup: getSubGroup(item.title) };
+        return { ...item, displayStatus: status, matter: getMatterCategory(item.title) };
     }
 
     const processedData = allData.map(analyzeItem);
     const orgMap = {};
     processedData.forEach(item => {
-        item.analysis.forEach(org => {
-            if (!orgMap[org.org_full]) orgMap[org.org_full] = { name: org.org_full, cases: [] };
-            orgMap[org.org_full].cases.push(item);
+        let targets = [...item.analysis.map(a => nameNormalization[a.org_full] || a.org_full)];
+        if (item.title.includes('美齡樓')) targets.push('中華民國婦女聯合會');
+        if (item.title.includes('大孝大樓') || item.title.includes('國發院') || item.title.includes('台中市黨部')) targets.push('中國國民黨');
+        if (item.title.includes('中廣')) targets.push('中國廣播股份有限公司');
+        [...new Set(targets)].forEach(org => {
+            if (OFFICIAL_ORGS.includes(org)) {
+                if (!orgMap[org]) orgMap[org] = { name: org, cases: [] };
+                if (!orgMap[org].cases.find(c => c.id === item.id)) orgMap[org].cases.push(item);
+            }
         });
     });
 
-    const router = () => {
-        const hash = window.location.hash || '#/';
-        const container = document.getElementById('view-container');
-        if (hash === '#/') renderKPI(container);
-        else if (hash.startsWith('#/org/')) {
-            const rawParam = decodeURIComponent(hash.split('/').pop());
-            // 如果是未識別組織，進行模糊搜尋
-            if (rawParam.startsWith('(未識別)')) {
-                const keyword = rawParam.replace('(未識別) ', '').replace('...', '');
-                renderFuzzySearch(container, keyword);
-            } else {
-                renderOrgFlow(container, rawParam);
-            }
-        }
-        else if (hash.startsWith('#/case/')) renderDetail(container, hash.split('/').pop());
-        updateSidebar();
-    };
-
-    function renderFuzzySearch(container, keyword) {
-        const matchedCases = allData.filter(c => c.title.includes(keyword));
-        container.innerHTML = `
-            <div class="mb-3"><a href="#/" class="text-decoration-none text-muted"><i class="bi bi-arrow-left"></i> 返回概覽</a></div>
-            <h1 class="fw-bold mb-4">搜尋結果：${keyword}</h1>
-            <div class="alert alert-info">提示：此為「未識別組織」的模糊比對結果。</div>
-            <div class="row g-4">
-                ${matchedCases.map(c => `
-                    <div class="col-md-6">
-                        <div class="case-card" onclick="location.hash='#/case/${c.id}'">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="status-badge bg-primary text-white">匹配案件</span>
-                                <small class="text-muted">${c.category}</small>
-                            </div>
-                            <div class="fw-bold">${c.title}</div>
-                        </div>
-                    </div>
-                `).join('') || '<p class="text-muted">查無匹配案件</p>'}
-            </div>
-        `;
+    function linkifyAdminActions(text) {
+        const regex = /黨產處字第(\d+)號/g;
+        return text.replace(regex, (match, no) => {
+            const target = allData.find(d => d.category_key === 'administrative_actions' && d.title.includes(no));
+            if (target) return `<a href="#/case/${target.id}" class="admin-action-link"><i class="bi bi-link-45deg"></i>${match}</a>`;
+            return match;
+        });
     }
 
     function renderKPI(container) {
-        const totalLit = processedData.filter(i => i.category_key === 'litigations').length;
-        const wins = processedData.filter(i => i.displayStatus.score === 1 && i.category_key === 'litigations').length;
+        const lits = processedData.filter(i => i.category_key === 'litigations');
+        const totalWon = lits.filter(i => i.displayStatus.score === 1).length;
+        const totalLost = lits.filter(i => i.displayStatus.score === -1).length;
         const orders = processedData.filter(i => i.hasOrder || i.category_key === 'administrative_actions').length;
+        const stabilityRate = (totalWon + totalLost) > 0 ? Math.round(totalWon / (totalWon + totalLost) * 100) : 0;
 
         container.innerHTML = `
-            <h1 class="fw-bold mb-4">系統績效監控儀錶板</h1>
+            <h1 class="fw-bold mb-4">黨產處分司法防線儀錶板</h1>
             <div class="row g-4 mb-5">
-                <div class="col-md-4"><div class="card glass-card kpi-card p-4">
-                    <small class="text-muted text-uppercase fw-bold">核心績效 (第 6 條處分)</small>
-                    <h2 class="display-5 fw-bold mb-0">${orders} <span class="fs-6 text-primary">件已處分</span></h2>
+                <div class="col-md-3"><div class="card glass-card kpi-card p-4">
+                    <small class="text-muted text-uppercase fw-bold">處分成果</small>
+                    <h2 class="display-6 fw-bold mb-0">${orders} <span class="fs-6 text-primary">項作成</span></h2>
                 </div></div>
-                <div class="col-md-4"><div class="card glass-card kpi-card p-4" style="border-left-color: #198754;">
-                    <small class="text-muted text-uppercase fw-bold">法院攻防勝場</small>
-                    <h2 class="display-5 fw-bold mb-0">${wins} <span class="fs-6 text-success">處分獲維持</span></h2>
+                <div class="col-md-3"><div class="card glass-card kpi-card p-4" style="border-left-color: #198754;">
+                    <small class="text-muted text-uppercase fw-bold">司法防線穩固</small>
+                    <h2 class="display-6 fw-bold mb-0">${totalWon} <span class="fs-6 text-success">案維持</span></h2>
                 </div></div>
-                <div class="col-md-4"><div class="card glass-card kpi-card p-4" style="border-left-color: #0dcaf0;">
-                    <small class="text-muted text-uppercase fw-bold">處分勝率</small>
-                    <h2 class="display-5 fw-bold mb-0">${totalLit > 0 ? Math.round(wins/totalLit*100) : 0}% <span class="fs-6 text-info">法理穩定度</span></h2>
+                <div class="col-md-3"><div class="card glass-card kpi-card p-4" style="border-left-color: #dc3545;">
+                    <small class="text-muted text-uppercase fw-bold">司法撤銷受挫</small>
+                    <h2 class="display-6 fw-bold mb-0">${totalLost} <span class="fs-6 text-danger">案撤銷</span></h2>
+                </div></div>
+                <div class="col-md-3"><div class="card glass-card kpi-card p-4" style="border-left-color: #0dcaf0;">
+                    <small class="text-muted text-uppercase fw-bold">整體維持率</small>
+                    <h2 class="display-6 fw-bold mb-0">${stabilityRate}% <span class="fs-6 text-info">法理穩固</span></h2>
                 </div></div>
             </div>
             <div class="row g-4">
-                ${Object.keys(orgMap).sort().map(name => `
+                ${OFFICIAL_ORGS.filter(name => orgMap[name]).map(name => `
                     <div class="col-md-4">
                         <div class="card glass-card p-3 h-100">
-                            <h5 class="fw-bold">${name}</h5><p class="text-muted small">關聯程序：${orgMap[name].cases.length} 筆</p>
-                            <a href="#/org/${encodeURIComponent(name)}" class="btn btn-sm btn-outline-primary mt-auto">查看流水線</a>
+                            <h5 class="fw-bold">${name}</h5><p class="text-muted small">關聯處分與程序：${orgMap[name].cases.length} 筆</p>
+                            <a href="#/org/${encodeURIComponent(name)}" class="btn btn-sm btn-outline-primary mt-auto">查看處分生命週期</a>
                         </div>
                     </div>`).join('')}
             </div>`;
@@ -147,73 +186,128 @@
 
     function renderOrgFlow(container, name) {
         const org = orgMap[name];
-        const cases = org.cases;
-        const init = cases.filter(c => c.category_key === 'investigations' || c.category_key === 'hearings');
-        const recognition = cases.filter(c => c.isRecognition && (c.category_key === 'administrative_actions' || c.category_key === 'litigations'));
-        const execution = cases.filter(c => !c.isRecognition && (c.category_key === 'administrative_actions' || c.category_key === 'litigations'));
+        if (!org) return;
+        const matters = {};
+        org.cases.forEach(c => { if (!matters[c.matter]) matters[c.matter] = []; matters[c.matter].push(c); });
+
+        const matterOrder = [
+            '核心案件：附隨組織地位認定',
+            '財產處分：不當取得財產移轉與追徵',
+            '特定財產案：美齡樓',
+            '特定財產案：大孝大樓',
+            '特定財產案：國發院土地',
+            '特定財產案：台中市黨部',
+            '裁罰案件：違反黨產條例',
+            '其他程序案件'
+        ];
 
         container.innerHTML = `
             <div class="mb-3"><a href="#/" class="text-decoration-none text-muted"><i class="bi bi-arrow-left"></i> 返回概覽</a></div>
-            <h1 class="fw-bold mb-4">${name} 程序流水線</h1>
-            <div class="row g-3">
-                <div class="col-md-3"><div class="phase-column">
-                    <div class="phase-title">階段 01：調查與聽證</div>
-                    ${renderGrouped(init)}
-                </div></div>
-                <div class="col-md-4"><div class="phase-column">
-                    <div class="phase-title">階段 02：主體認定 (基礎)</div>
-                    ${renderGrouped(recognition)}
-                </div></div>
-                <div class="col-md-5"><div class="phase-column">
-                    <div class="phase-title">階段 03：財產處分 (執行)</div>
-                    ${renderGrouped(execution)}
-                </div></div>
+            <h1 class="fw-bold mb-5">${name} 處分生命週期圖譜</h1>
+            <div class="lifecycle-timeline">
+                ${matterOrder.filter(m => matters[m]).map(mName => {
+                    const stageInvest = matters[mName].filter(c => c.category_key === 'investigations');
+                    const stageHear = matters[mName].filter(c => c.category_key === 'hearings');
+                    const stageDecision = matters[mName].filter(c => c.category_key === 'administrative_actions');
+                    const stageLitigation = matters[mName].filter(c => c.category_key === 'litigations');
+                    
+                    return `
+                    <div class="matter-section">
+                        <h4 class="matter-title">${mName}</h4>
+                        <div class="flow-container">
+                            <div class="flow-stage">
+                                <div class="stage-label text-muted"><i class="bi bi-search"></i> 01 調查啟動</div>
+                                ${stageInvest.map(renderMiniCard).join('') || '<div class="text-muted small italic">不適用或併案</div>'}
+                            </div>
+                            <div class="flow-arrow"><i class="bi bi-chevron-right"></i></div>
+                            <div class="flow-stage">
+                                <div class="stage-label text-info"><i class="bi bi-chat-left-dots"></i> 02 聽證程序</div>
+                                ${stageHear.map(renderMiniCard).join('') || '<div class="text-muted small italic">無公開聽證紀錄</div>'}
+                            </div>
+                            <div class="flow-arrow"><i class="bi bi-chevron-right"></i></div>
+                            <div class="flow-stage" style="background: #fff5f5; border-color: #feb2b2;">
+                                <div class="stage-label text-danger"><i class="bi bi-hammer"></i> 03 行政處分</div>
+                                ${stageDecision.map(renderMiniCard).join('') || '<div class="text-muted small italic">處分尚未作成</div>'}
+                            </div>
+                            <div class="flow-arrow"><i class="bi bi-chevron-right"></i></div>
+                            <div class="flow-stage" style="background: #f0f7ff; border-color: #bee3f8;">
+                                <div class="stage-label text-primary"><i class="bi bi-shield-shaded"></i> 04 司法訴訟</div>
+                                ${stageLitigation.map(renderMiniCard).join('') || '<div class="text-muted small italic">尚無訴訟紀錄</div>'}
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('')}
             </div>`;
     }
 
-    function renderGrouped(cases) {
-        if (cases.length === 0) return '<p class="text-muted small">無紀錄</p>';
-        const groups = [...new Set(cases.map(c => c.subGroup))].sort();
-        return groups.map(g => `
-            <div class="group-header">${g}</div>
-            ${cases.filter(c => c.subGroup === g).map(c => `
-                <div class="case-card" onclick="location.hash='#/case/${c.id}'">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span class="status-badge ${c.displayStatus.class}">${c.displayStatus.label}</span>
-                        ${c.hasOrder ? '<i class="bi bi-hammer text-danger"></i>' : ''}
-                    </div>
-                    <div class="small fw-bold" style="font-size: 0.75rem;">${c.title}</div>
-                </div>`).join('')}`).join('');
+    function renderMiniCard(c) {
+        return `<div class="case-card shadow-sm p-2 mb-2" onclick="location.hash='#/case/${c.id}'" style="border-radius:6px; font-size:0.75rem;">
+            <div class="fw-bold" style="color:#2d3748; line-height:1.2;">${c.title}</div>
+            <span class="status-badge ${c.displayStatus.class} mt-1" style="font-size:0.55rem; display:inline-block;">${c.displayStatus.label}</span>
+        </div>`;
     }
 
     function renderDetail(container, id) {
         const item = processedData.find(i => i.id === id);
         if (!item) return;
-        container.innerHTML = `
-            <div class="mb-4"><button onclick="history.back()" class="btn btn-link p-0 text-muted text-decoration-none"><i class="bi bi-arrow-left"></i> 返回流水線</button></div>
-            <div class="card glass-card p-5">
-                <span class="badge ${item.displayStatus.class} mb-3" style="width: fit-content;">${item.displayStatus.label}</span>
-                <h2 class="fw-bold mb-3">${item.title}</h2>
-                <p class="text-muted">分類：${item.category} | <a href="${item.url}" target="_blank">官方連結</a></p>
-                <hr><h4 class="fw-bold mb-4 mt-4">時間軸進度與主文詳情</h4>
-                <div class="ps-3">
-                    ${[...item.events].sort((a,b) => new Date(b.date) - new Date(a.date)).map(e => `
-                        <div class="ps-4 mb-4 border-start border-primary border-3 position-relative">
-                            <div class="position-absolute bg-primary rounded-circle" style="width:10px; height:10px; left:-7px; top:6px;"></div>
-                            <div class="fw-bold small">${e.date} - ${e.caption}</div>
-                            ${e.description ? `<div class="event-desc">${e.description}</div>` : ''}
-                        </div>`).join('')}
-                </div>
-            </div>`;
+        const protagonists = [...new Set(item.analysis.map(a => nameNormalization[a.org_full] || a.org_full))].filter(p => OFFICIAL_ORGS.includes(p));
+        const isLitigation = item.category_key === 'litigations';
+        let contentHTML = "";
+        if (isLitigation) {
+            // ... [訴訟頁面邏輯保持不變] ...
+            const groupEvents = (events, protagonists) => {
+                const groups = { '處分基礎與共同事件': [] };
+                const plaintiffKeywords = [{ key: '光華投資', label: '光華投資股份有限公司' }, { key: '中廣', label: '中國廣播股份有限公司' }, { key: '中投', label: '中央投資股份有限公司' }, { key: '欣裕台', label: '欣裕台股份有限公司' }, { key: '國民黨', label: '中國國民黨' }];
+                const sortedEvents = [...events].sort((a,b) => new Date(a.date) - new Date(a.date));
+                sortedEvents.forEach(e => {
+                    const content = e.caption + e.description;
+                    if (e.caption.includes('作成') || e.caption.includes('釋字') || e.caption.includes('委員會議')) { groups['處分基礎與共同事件'].push(e); return; }
+                    let matches = new Set();
+                    for (const k of plaintiffKeywords) if (content.includes(k.key)) matches.add(nameNormalization[k.label] || k.label);
+                    for (const p of protagonists) if (content.includes(p)) matches.add(nameNormalization[p] || p);
+                    if (matches.size > 0) matches.forEach(p => { const l = `原告：${p}`; if(!groups[l]) groups[l]=[]; groups[l].push(e); });
+                    else groups['處分基礎與共同事件'].push(e);
+                });
+                return groups;
+            };
+            const grouped = groupEvents(item.events, protagonists);
+            const plaintiffKeys = Object.keys(grouped).filter(k => k.startsWith('原告：'));
+            const commonEvents = grouped['處分基礎與共同事件'] || [];
+            contentHTML = `
+                ${commonEvents.length > 0 ? `<div class="mb-4 p-3 bg-light rounded border"><h6>處分基礎與共同事件</h6><div class="small">${commonEvents.map(e => `<div>${e.date} ${linkifyAdminActions(e.caption)}</div>`).join('')}</div></div>` : ''}
+                <div class="row g-3">${plaintiffKeys.map(k => {
+                    const status = analyzeLitigationStatus(grouped[k]);
+                    return `
+                    <div class="col-md-6"><div class="card p-3 h-100 shadow-sm border-top border-primary border-4">
+                        <h6 class="fw-bold mb-1">${k}</h6><span class="badge ${status.class} mb-3" style="width:fit-content">${status.label}</span>
+                        ${grouped[k].sort((a,b) => new Date(b.date) - new Date(a.date)).map(e => `<div class="small border-start ps-2 mb-2"><b>${e.date}</b><br>${linkifyAdminActions(e.caption)}</div>`).join('')}
+                    </div></div>`}).join('')}
+                </div>`;
+        } else {
+            contentHTML = `<div class="mt-4">${item.events.sort((a,b) => new Date(b.date) - new Date(a.date)).map(e => `<div class="mb-3 border-start ps-3 border-3"><b>${e.date}</b> ${linkifyAdminActions(e.caption)}<div class="text-muted small mt-1">${linkifyAdminActions(e.description)}</div></div>`).join('')}</div>`;
+        }
+        container.innerHTML = `<div class="mb-4"><button onclick="history.back()" class="btn btn-link p-0 text-muted text-decoration-none">← 返回</button></div>
+            <div class="card glass-card p-5 position-relative">
+                <div class="position-absolute top-0 end-0 p-4 text-end">${protagonists.map(p => `<span class="protagonist-tag shadow-sm">${p}</span>`).join('')}</div>
+                <div style="max-width:calc(100% - 340px)"><span class="badge ${item.displayStatus.class} mb-2">${item.displayStatus.label}</span><h2 class="fw-bold">${item.title}</h2><p class="text-muted small">${item.category} | <a href="${item.url}" target="_blank">官方連結</a></p></div>
+                <hr>${contentHTML}</div>`;
     }
+
+    const router = () => {
+        const hash = window.location.hash || '#/';
+        const container = document.getElementById('view-container');
+        if (hash === '#/') renderKPI(container);
+        else if (hash.startsWith('#/org/')) renderOrgFlow(container, decodeURIComponent(hash.split('/').pop()));
+        else if (hash.startsWith('#/case/')) renderDetail(container, hash.split('/').pop());
+        updateSidebar();
+    };
 
     function updateSidebar() {
         const nav = document.getElementById('org-nav');
-        const orgs = Object.keys(orgMap).sort();
-        let html = `<li class="nav-item"><a class="nav-link ${window.location.hash==='#/'?'active':''}" href="#/"><i class="bi bi-speedometer2 me-2"></i>績效概覽</a></li><div class="small text-muted mt-4 mb-2 px-3 text-uppercase">組織</div>`;
-        orgs.forEach(o => {
-            const active = window.location.hash === `#/org/${encodeURIComponent(o)}`;
-            html += `<li class="nav-item"><a class="nav-link ${active?'active':''}" href="#/org/${encodeURIComponent(o)}"><i class="bi bi-building me-2"></i>${o.length > 12 ? o.substring(0,12)+'..' : o}</a></li>`;
+        let html = `<li class="nav-item"><a class="nav-link ${window.location.hash==='#/'?'active':''}" href="#/"><i class="bi bi-speedometer2 me-2"></i>概覽</a></li><div class="small text-muted mt-4 mb-2 px-3 text-uppercase">組織清單</div>`;
+        OFFICIAL_ORGS.filter(o => orgMap[o]).forEach(o => {
+            const active = window.location.hash.includes(encodeURIComponent(o));
+            html += `<li class="nav-item"><a class="nav-link ${active?'active':''}" href="#/org/${encodeURIComponent(o)}"><i class="bi bi-building me-2"></i>${o.substring(0,12)}</a></li>`;
         });
         nav.innerHTML = html;
     }
