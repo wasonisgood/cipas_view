@@ -7,15 +7,15 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
-        body { background-color: #f8f9fa; font-family: "Inter", "Microsoft JhengHei", sans-serif; }
+        body { background-color: #f8f9fa; font-family: "Inter", "Microsoft JhengHei", sans-serif; overflow-x: hidden; }
         .stats-card { background: white; border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 1.5rem; margin-bottom: 2rem; }
         .kpi-card { border-top: 5px solid #0d6efd; transition: transform 0.2s; }
         
         /* 日曆表格化顯示 */
         .year-row { border-bottom: 1px solid #dee2e6; padding: 15px 0; }
-        .year-label { font-size: 1.2rem; font-weight: 800; color: #343a40; min-width: 100px; }
+        .year-label { font-size: 1.2rem; font-weight: 800; color: #343a40; min-width: 80px; }
         .month-grid { display: flex; gap: 8px; flex-wrap: wrap; }
-        .month-btn { width: 50px; height: 50px; border: 1px solid #dee2e6; border-radius: 8px; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; position: relative; }
+        .month-btn { width: 48px; height: 48px; min-width: 44px; min-height: 44px; border: 1px solid #dee2e6; border-radius: 8px; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; position: relative; }
         .month-btn:hover { border-color: #0d6efd; background: #f0f7ff; }
         .month-btn.active { background: #0d6efd; color: white; border-color: #0d6efd; }
         .count-dot { position: absolute; top: -5px; right: -5px; background: #dc3545; color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 10px; font-weight: bold; }
@@ -26,29 +26,37 @@
         .log-item::before { content: ""; position: absolute; left: -8px; top: 0; width: 13px; height: 13px; border-radius: 50%; background: #0d6efd; border: 2px solid white; }
         .court-win { border-left-color: #198754; }
         .court-lose { border-left-color: #dc3545; }
-        .desc-box { font-size: 0.8rem; background: #f1f3f5; padding: 8px; border-radius: 5px; margin-top: 5px; color: #495057; white-space: pre-wrap; }
+        .desc-box { font-size: 0.8rem; background: #f1f3f5; padding: 8px; border-radius: 5px; margin-top: 5px; color: #495057; white-space: pre-wrap; word-break: break-word; }
         
-        .search-container { position: relative; max-width: 400px; }
-        .search-input { border-radius: 20px; padding-left: 40px; }
-        .search-icon { position: absolute; left: 15px; top: 10px; color: #6c757d; }
+        .search-container { position: relative; width: 100%; max-width: 400px; }
+        .search-input { border-radius: 20px; padding-left: 40px; min-height: 44px; }
+        .search-icon { position: absolute; left: 15px; top: 12px; color: #6c757d; }
+
+        .btn-touch { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+
+        @media (max-width: 575.98px) {
+            .container-fluid { padding-left: 12px !important; padding-right: 12px !important; }
+            .stats-card { padding: 1rem; }
+            .month-btn { width: 44px; height: 44px; font-size: 0.85rem; }
+        }
     </style>
 </head>
 <body>
 
-<div class="container-fluid py-4 px-lg-5">
+<div class="container-fluid py-4 px-3 px-lg-5">
     <!-- 導航與搜尋 -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
-            <h1 class="fw-bold mb-0">CIPAS 終極績效監控看板</h1>
-            <p class="text-muted small">年度統計、司法勝率、程序阻塞與深度日誌一站式呈現</p>
+            <h1 class="fw-bold mb-0 fs-3">CIPAS 終極績效監控看板</h1>
+            <p class="text-muted small mb-0">年度統計、司法勝率、程序阻塞與深度日誌一站式呈現</p>
         </div>
-        <div class="d-flex gap-2 align-items-center">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
             <div class="search-container">
                 <i class="bi bi-search search-icon"></i>
                 <input type="text" id="globalSearch" class="form-control search-input" placeholder="搜尋組織、標題或主文..." onkeyup="handleFilter()">
             </div>
-            <a href="dashboard.html" class="btn btn-dark"><i class="bi bi-diagram-3 me-2"></i> 流水線模式</a>
-            <a href="meetings_dashboard.html" class="btn btn-outline-dark"><i class="bi bi-journal-text me-2"></i> 會議紀錄智庫</a>
+            <a href="dashboard.html" class="btn btn-dark btn-touch"><i class="bi bi-diagram-3 me-2"></i> 流水線模式</a>
+            <a href="meetings_dashboard.html" class="btn btn-outline-dark btn-touch"><i class="bi bi-journal-text me-2"></i> 會議紀錄智庫</a>
         </div>
     </div>
 

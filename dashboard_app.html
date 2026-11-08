@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>CIPAS 全生命週期監控系統 (深度績效版)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --paper: #F9F9F7;
+            --paper-dark: #F2EFE9;
+            --ink: #1A1D20;
+            --ink-muted: #5C646D;
+            --rule: #E5E2DC;
+            --rule-dark: #D4D0C7;
+            --vermilion: #8C2F39;
+            --vermilion-subtle: #F9ECEE;
+            --scholar-navy: #1B365D;
+            --scholar-navy-subtle: #EDF3F9;
+            --success-green: #1B4332;
+            --success-subtle: #E8F3EE;
+            --amber-ochre: #8A4B08;
+            --amber-subtle: #FDF4E7;
+            --serif: "Playfair Display", "Noto Serif TC", Georgia, serif;
+            --mono: "JetBrains Mono", Consolas, Menlo, monospace;
+            --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft JhengHei", sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--paper);
+            color: var(--ink);
+            font-family: var(--sans);
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1, h2, h3, h4, .serif-heading {
+            font-family: var(--serif);
+            letter-spacing: -0.01em;
+            color: var(--ink);
+        }
+
+        .mono-num {
+            font-family: var(--mono);
+            font-feature-settings: "tnum";
+        }
+
+        /* Sidebar Styling (Classical Editorial Dark) */
+        #sidebar {
+            width: var(--sidebar-width);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            height: 100vh;
+            background: #171A1D;
+            color: #E8E6E1;
+            padding: 1.5rem 1.25rem;
+            overflow-y: auto;
+            z-index: 1050;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border-right: 1px solid #282C31;
+        }
+
+        #sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 18, 21, 0.6);
+            backdrop-filter: blur(2px);
+            z-index: 1045;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2.5rem 2.5rem;
+            min-height: 100vh;
+            transition: all 0.3s;
+            max-width: 1400px;
+        }
+
+        /* RWD Mobile Header & Off-canvas */
+        .mobile-header {
+            display: none;
+            background: #171A1D;
+            color: #E8E6E1;
+            padding: 0.75rem 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1040;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #282C31;
+        }
+
+        .mobile-toggle-btn {
+            min-width: 44px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #24292E;
+            color: #FFF;
+            border: 1px solid #363C44;
+            border-radius: 8px;
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        .mobile-toggle-btn:active {
+            background: #363C44;
+        }
+
+        .sidebar-close-btn {
+            display: none;
+            min-width: 44px;
+            min-height: 44px;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: #ADB5BD;
+            border: 1px solid #363C44;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 991.98px) {
+            #sidebar {
+                transform: translateX(-100%);
+                box-shadow: 4px 0 24px rgba(0,0,0,0.3);
+            }
+            #sidebar.active {
+                transform: translateX(0);
+            }
+            #sidebar.active + #sidebar-backdrop {
+                display: block;
+                opacity: 1;
+            }
+            #main-content {
+                margin-left: 0;
+                padding: 1.25rem 1rem;
+            }
+            .mobile-header {
+                display: flex !important;
+            }
+            .sidebar-close-btn {
+                display: inline-flex;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            #main-content {
+                padding: 1rem 0.75rem;
+            }
+        }
+
+        /* Nav & Search inside Sidebar */
+        .search-box {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #FFFFFF;
+            border-radius: 8px;
+            padding: 0.65rem 1rem;
+            width: 100%;
+            margin-bottom: 1.5rem;
+            min-height: 44px;
+            font-size: 0.9rem;
+        }
+        .search-box:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--vermilion);
+            outline: none;
+            color: #FFFFFF;
+        }
+        .search-box::placeholder {
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        .nav-link {
+            color: #B5BCC4;
+            border-radius: 8px;
+            margin-bottom: 0.35rem;
+            display: flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 0.6rem 0.9rem;
+            font-size: 0.9rem;
+            transition: background 0.15s, color 0.15s;
+        }
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #FFFFFF;
+        }
+        .nav-link.active {
+            background: #252B32;
+            color: #FFFFFF;
+            font-weight: 600;
+            border-left: 3px solid var(--vermilion);
+        }
+        .nav-link i {
+            width: 22px;
+            text-align: center;
+        }
+
+        /* Classical Editorial Cards */
+        .glass-card {
+            background: #FFFFFF;
+            border: 1px solid var(--rule);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(26, 29, 32, 0.04);
+        }
+
+        /* KPI Cards */
+        .kpi-card {
+            border-left: 4px solid var(--scholar-navy);
+            background: #FFFFFF;
+            padding: 1.25rem 1.25rem;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .kpi-card .kpi-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--ink-muted);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .kpi-card .kpi-number {
+            font-family: var(--mono);
+            font-size: calc(1.75rem + 0.5vw);
+            font-weight: 700;
+            line-height: 1.1;
+            color: var(--ink);
+        }
+        .kpi-card .kpi-unit {
+            font-size: 0.85rem;
+            font-family: var(--sans);
+            font-weight: 500;
+            margin-left: 0.25rem;
+        }
+
+        /* Organization Cards */
+        .org-card {
+            background: #FFFFFF;
+            border: 1px solid var(--rule);
+            border-radius: 10px;
+            padding: 1.25rem;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .org-card:hover {
+            border-color: var(--rule-dark);
+            box-shadow: 0 4px 14px rgba(26, 29, 32, 0.07);
+        }
+        .org-card-btn {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--rule-dark);
+            color: var(--ink);
+            background: var(--paper);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            margin-top: auto;
+            transition: all 0.15s ease;
+        }
+        .org-card-btn:hover {
+            background: var(--ink);
+            color: #FFFFFF;
+            border-color: var(--ink);
+        }
+
+        /* Matter Section & Timeline Flow */
+        .matter-section {
+            background: #FFFFFF;
+            border-radius: 14px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--rule);
+        }
+        .matter-title {
+            font-weight: 700;
+            color: var(--ink);
+            border-left: 4px solid var(--vermilion);
+            padding-left: 14px;
+            margin-bottom: 1.25rem;
+            font-size: 1.15rem;
+        }
+
+        .flow-scroll-hint {
+            font-size: 0.8rem;
+            color: var(--ink-muted);
+            background: var(--paper);
+            border: 1px dashed var(--rule-dark);
+            border-radius: 6px;
+            padding: 0.4rem 0.75rem;
+            margin-bottom: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .flow-container {
+            display: flex;
+            align-items: stretch;
+            gap: 0.75rem;
+            overflow-x: auto;
+            padding-bottom: 0.75rem;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x proximity;
+        }
+        .flow-stage {
+            flex: 1;
+            min-width: 250px;
+            background: var(--paper);
+            border-radius: 10px;
+            padding: 1rem;
+            border: 1px solid var(--rule);
+            scroll-snap-align: start;
+        }
+        .flow-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ink-muted);
+            font-size: 1.2rem;
+            opacity: 0.5;
+            padding: 0 0.1rem;
+            flex-shrink: 0;
+        }
+        .stage-label {
+            font-weight: 700;
+            font-size: 0.825rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        /* Case Cards inside stages */
+        .case-card {
+            background: #FFFFFF;
+            border-radius: 8px;
+            padding: 0.75rem 0.85rem;
+            margin-bottom: 0.65rem;
+            border: 1px solid var(--rule);
+            cursor: pointer;
+            min-height: 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: all 0.15s ease;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .case-card:hover {
+            border-color: var(--vermilion);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+        }
+        .case-card:active {
+            transform: scale(0.99);
+        }
+
+        /* Badges & Tags */
+        .status-badge {
+            font-size: 0.725rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            font-weight: 600;
+            display: inline-block;
+            letter-spacing: 0.02em;
+        }
+        .badge-won {
+            background: var(--success-subtle);
+            color: var(--success-green);
+            border: 1px solid #C4E2D2;
+        }
+        .badge-lost {
+            background: var(--vermilion-subtle);
+            color: var(--vermilion);
+            border: 1px solid #F0C4C8;
+        }
+        .badge-process {
+            background: var(--scholar-navy-subtle);
+            color: var(--scholar-navy);
+            border: 1px solid #CADAEB;
+        }
+        .badge-neutral {
+            background: var(--paper-dark);
+            color: var(--ink-muted);
+            border: 1px solid var(--rule-dark);
+        }
+
+        .protagonist-tag {
+            background: var(--paper);
+            color: var(--ink);
+            border: 1px solid var(--rule);
+            padding: 0.4rem 0.85rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .admin-action-link {
+            display: inline-inline-flex;
+            align-items: center;
+            gap: 2px;
+            color: var(--vermilion);
+            background: var(--vermilion-subtle);
+            border: 1px solid #F0C4C8;
+            padding: 2px 7px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            word-break: break-all;
+        }
+        .admin-action-link:hover {
+            background: #F4D9DC;
+            color: #6D212A;
+            text-decoration: underline;
+        }
+
+        /* Back Button */
+        .btn-touch-back {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #FFFFFF;
+            border: 1px solid var(--rule);
+            border-radius: 8px;
+            color: var(--ink);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-touch-back:hover {
+            background: var(--paper-dark);
+            color: var(--ink);
+            border-color: var(--rule-dark);
+        }
+
+        /* Timeline Items in Detail */
+        .timeline-entry {
+            margin-bottom: 1.25rem;
+            border-left: 3px solid var(--rule-dark);
+            padding-left: 1rem;
+            position: relative;
+        }
+        .timeline-entry.entry-action {
+            border-left-color: var(--vermilion);
+        }
+        .timeline-entry.entry-litigation {
+            border-left-color: var(--scholar-navy);
+        }
+        .timeline-date {
+            font-family: var(--mono);
+            font-weight: 700;
+            color: var(--ink);
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .timeline-desc {
+            color: var(--ink-muted);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D4D0C7;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #B5B0A4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="mobile-header">
+    <div class="d-flex align-items-center">
+        <i class="bi bi-shield-shaded fs-4 me-2" style="color: var(--vermilion)"></i>
+        <span class="fw-bold fs-6">CIPAS 處分監控系統</span>
+    </div>
+    <button class="mobile-toggle-btn" onclick="toggleSidebar()" aria-label="切換選單">
+        <i class="bi bi-list"></i>
+    </button>
+</div>
+
+<nav id="sidebar">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-shield-shaded fs-3 me-2" style="color: #E26D7A"></i>
+            <div>
+                <h4 class="fw-bold mb-0 serif-heading" style="color: #FFF;">CIPAS View</h4>
+                <div class="small" style="color: rgba(255,255,255,0.5); font-size: 0.725rem;">黨產處分生命週期台帳</div>
+            </div>
+        </div>
+        <button class="sidebar-close-btn" onclick="toggleSidebar()" aria-label="關閉選單">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+    
+    <input type="text" id="global-search" class="search-box" placeholder="搜尋案件、處分、原告..." onkeyup="handleSearch(event)">
+
+    <ul class="nav flex-column" id="main-nav">
+        <li class="nav-item">
+            <a class="nav-link" id="nav-home" href="#/" onclick="onNavClick()">
+                <i class="bi bi-speedometer2 me-2"></i>全案總體概覽
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="stats.html">
+                <i class="bi bi-graph-up-arrow me-2"></i>數據統計日誌
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="meetings_dashboard.html">
+                <i class="bi bi-journal-text me-2"></i>委員會議決策智庫
+            </a>
+        </li>
+    </ul>
+
+    <div class="small mt-4 mb-2 px-2 text-uppercase fw-bold" style="color: rgba(255,255,255,0.4); font-size: 0.75rem; letter-spacing: 0.05em;">
+        受處分組織圖譜
+    </div>
+    <ul class="nav flex-column" id="org-nav"></ul>
+</nav>
+
+<div id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+<main id="main-content">
+    <div id="view-container"></div>
+</main>
+
+<script src="cipas_full_data.js"></script>
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('active');
+    }
+
+    function onNavClick() {
+        if (window.innerWidth < 992) {
+            document.getElementById('sidebar').classList.remove('active');
+        }
+    }
+
+    function handleSearch(e) {
+        if (e.key === 'Enter') {
+            const query = e.target.value.trim();
+            if (query) {
+                const results = processedData.filter(item => 
+                    item.title.includes(query) || 
+                    (item.events && item.events.some(ev => (ev.caption + ev.description).includes(query)))
+                );
+                renderSearchResults(results, query);
+            }
+        }
+    }
+
+    function renderSearchResults(results, query) {
+        const container = document.getElementById('view-container');
+        container.innerHTML = `
+            <div class="mb-4">
+                <a href="#/" class="btn-touch-back">
+                    <i class="bi bi-arrow-left"></i> 返回總覽
+                </a>
+            </div>
+            <h2 class="serif-heading fw-bold mb-3">搜尋結果: "${query}" <span class="badge bg-secondary fs-6 align-middle">${results.length} 筆</span></h2>
+            <div class="row g-3">
+                ${results.map(item => `
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card glass-card p-3 h-100 case-card" onclick="location.hash='#/case/${item.id}'">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="status-badge ${item.displayStatus.badgeClass}">${item.displayStatus.label}</span>
+                                <span class="text-muted small">${item.category}</span>
+                            </div>
+                            <h6 class="fw-bold mb-1" style="color: var(--ink); line-height: 1.4;">${item.title}</h6>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>`;
+        if (window.innerWidth < 992) {
+            document.getElementById('sidebar').classList.remove('active');
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    const allData = typeof cipasFullData !== 'undefined' ? cipasFullData : [];
+    
+    const OFFICIAL_ORGS = [
+        '中國國民黨', '中華民國婦女聯合會', '中國廣播股份有限公司', 
+        '中央投資股份有限公司', '欣裕台股份有限公司', '中影股份有限公司', 
+        '社團法人中國青年救國團', '中華救助總會', '財團法人民生建設基金會',
+        '財團法人民族基金會', '財團法人民權基金會', '財團法人國家發展基金會',
+        '欣光華股份有限公司', '光華投資股份有限公司'
+    ];
+
+    const nameNormalization = {
+        '婦聯會': '中華民國婦女聯合會',
+        '中華民國婦女聯合會': '中華民國婦女聯合會',
+        '中廣': '中國廣播股份有限公司',
+        '中國廣播公司': '中國廣播股份有限公司',
+        '中國廣播股份有限公司': '中國廣播股份有限公司',
+        '中投': '中央投資股份有限公司',
+        '中央投資公司': '中央投資股份有限公司',
+        '中央投資股份有限公司': '中央投資股份有限公司',
+        '欣裕台': '欣裕台股份有限公司',
+        '欣裕台公司': '欣裕台股份有限公司',
+        '欣裕台股份有限公司': '欣裕台股份有限公司',
+        '光華投資': '光華投資股份有限公司',
+        '光華投資公司': '光華投資股份有限公司',
+        '光華投資股份有限公司': '光華投資股份有限公司',
+        '國民黨': '中國國民黨',
+        '中國國民黨': '中國國民黨',
+        '救總': '中華救助總會',
+        '中華救助總會': '中華救助總會',
+        '救助總會': '中華救助總會'
+    };
+
+    function getMatterCategory(title) {
+        const t = title;
+        if (t.includes('美齡樓')) return '特定財產案：美齡樓';
+        if (t.includes('大孝大樓')) return '特定財產案：大孝大樓';
+        if (t.includes('國發院')) return '特定財產案：國發院土地';
+        if (t.includes('台中市黨部')) return '特定財產案：台中市黨部';
+        if (t.includes('罰鍰')) return '裁罰案件：違反黨產條例';
+        if (t.includes('附隨組織') || OFFICIAL_ORGS.some(org => t === org + '案' || t === org + '調查案') || (t.includes('中央投資') && t.includes('欣裕台') && !t.includes('股權'))) {
+            return '核心案件：附隨組織地位認定';
+        }
+        if (t.includes('移轉國有') || t.includes('不當取得財產') || t.includes('追徵') || t.includes('股權')) {
+            return '財產處分：不當取得財產移轉與追徵';
+        }
+        return '其他程序案件';
+    }
+
+    function analyzeLitigationStatus(events) {
+        if (!events || events.length === 0) return { label: '無進度', badgeClass: 'badge-neutral', score: 0 };
+        const sorted = [...events].sort((a,b) => new Date(b.date) - new Date(a.date));
+        const latest = sorted[0];
+        const latestFull = (latest.caption + latest.description);
+        if (latestFull.includes('最高行政法院')) {
+            if (latestFull.includes('駁回') || latestFull.includes('確定')) return { label: '處分獲維持 (定讞)', badgeClass: 'badge-won', score: 100 };
+            if (latestFull.includes('撤銷原處分')) return { label: '處分遭撤銷 (定讞)', badgeClass: 'badge-lost', score: -100 };
+            if (latestFull.includes('發回') || latestFull.includes('更審')) return { label: '法院發回更審', badgeClass: 'badge-process', score: 50 };
+        }
+        if (latest.caption.includes('提起上訴') && !latest.caption.includes('駁回')) return { label: '上訴審理中', badgeClass: 'badge-process', score: 40 };
+        if (latestFull.includes('原告之訴駁回')) return { label: '處分獲維持 (一審)', badgeClass: 'badge-won', score: 80 };
+        if (latestFull.includes('原處分撤銷')) return { label: '處分遭撤銷 (一審)', badgeClass: 'badge-lost', score: -80 };
+        return { label: '司法審理中', badgeClass: 'badge-process', score: 30 };
+    }
+
+    function analyzeItem(item) {
+        let status = { label: '處理中', badgeClass: 'badge-neutral', score: 0 };
+        if (item.category_key === 'litigations') {
+            const litStatus = analyzeLitigationStatus(item.events);
+            if (litStatus.score >= 80) status = { label: '處分獲維持', badgeClass: 'badge-won', score: 1 };
+            else if (litStatus.score < 0) status = { label: '效力受挫', badgeClass: 'badge-lost', score: -1 };
+            else status = { label: '司法攻防中', badgeClass: 'badge-process', score: 0 };
+        } else if (item.category_key === 'administrative_actions') {
+            status = { label: '處分已作成', badgeClass: 'badge-lost', score: 1 };
+        }
+        return { ...item, displayStatus: status, matter: getMatterCategory(item.title) };
+    }
+
+    const processedData = allData.map(analyzeItem);
+    const orgMap = {};
+    processedData.forEach(item => {
+        let targets = [...(item.analysis || []).map(a => nameNormalization[a.org_full] || a.org_full)];
+        if (item.title.includes('美齡樓')) targets.push('中華民國婦女聯合會');
+        if (item.title.includes('大孝大樓') || item.title.includes('國發院') || item.title.includes('台中市黨部')) targets.push('中國國民黨');
+        if (item.title.includes('中廣')) targets.push('中國廣播股份有限公司');
+        [...new Set(targets)].forEach(org => {
+            if (OFFICIAL_ORGS.includes(org)) {
+                if (!orgMap[org]) orgMap[org] = { name: org, cases: [] };
+                if (!orgMap[org].cases.find(c => c.id === item.id)) orgMap[org].cases.push(item);
+            }
+        });
+    });
+
+    function linkifyAdminActions(text) {
+        if (!text) return '';
+        const regex = /黨產處字第(\d+)號/g;
+        return text.replace(regex, (match, no) => {
+            const target = allData.find(d => d.category_key === 'administrative_actions' && d.title.includes(no));
+            if (target) return `<a href="#/case/${target.id}" class="admin-action-link"><i class="bi bi-link-45deg"></i>${match}</a>`;
+            return match;
+        });
+    }
+
+    function renderKPI(container) {
+        const lits = processedData.filter(i => i.category_key === 'litigations');
+        const totalWon = lits.filter(i => i.displayStatus.score === 1).length;
+        const totalLost = lits.filter(i => i.displayStatus.score === -1).length;
+        const orders = processedData.filter(i => i.hasOrder || i.category_key === 'administrative_actions').length;
+        const stabilityRate = (totalWon + totalLost) > 0 ? Math.round(totalWon / (totalWon + totalLost) * 100) : 0;
+
+        container.innerHTML = `
+            <div class="mb-4">
+                <span class="text-uppercase fw-bold" style="color: var(--vermilion); font-size: 0.8rem; letter-spacing: 0.08em;">CIPAS Judicial Overview</span>
+                <h1 class="serif-heading fw-bold mt-1 mb-2">黨產處分司法防線儀錶板</h1>
+                <p class="text-muted" style="max-width: 720px; font-size: 0.95rem;">
+                    彙整不當黨產處理委員會自成立以來的行政處分、附隨組織認定、聽證程序及後續行政訴訟裁判進程。
+                </p>
+            </div>
+
+            <!-- KPI Cards: 2x2 on mobile, 4 columns on desktop -->
+            <div class="row g-3 g-md-4 mb-5">
+                <div class="col-6 col-lg-3">
+                    <div class="glass-card kpi-card" style="border-left-color: var(--scholar-navy);">
+                        <div class="kpi-label">處分成果</div>
+                        <div>
+                            <span class="kpi-number">${orders}</span>
+                            <span class="kpi-unit text-primary">項作成</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="glass-card kpi-card" style="border-left-color: var(--success-green);">
+                        <div class="kpi-label">司法防線維持</div>
+                        <div>
+                            <span class="kpi-number text-success">${totalWon}</span>
+                            <span class="kpi-unit text-success">案維持</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="glass-card kpi-card" style="border-left-color: var(--vermilion);">
+                        <div class="kpi-label">司法撤銷受挫</div>
+                        <div>
+                            <span class="kpi-number" style="color: var(--vermilion);">${totalLost}</span>
+                            <span class="kpi-unit" style="color: var(--vermilion);">案撤銷</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="glass-card kpi-card" style="border-left-color: var(--amber-ochre);">
+                        <div class="kpi-label">整體司法維持率</div>
+                        <div>
+                            <span class="kpi-number" style="color: var(--amber-ochre);">${stabilityRate}%</span>
+                            <span class="kpi-unit text-muted">法理穩固</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h3 class="serif-heading fw-bold mb-0">受處分組織圖譜</h3>
+                <span class="text-muted small">${OFFICIAL_ORGS.filter(n => orgMap[n]).length} 個主體</span>
+            </div>
+
+            <div class="row g-3 g-md-4">
+                ${OFFICIAL_ORGS.filter(name => orgMap[name]).map(name => `
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="org-card">
+                            <h5 class="serif-heading fw-bold mb-2">${name}</h5>
+                            <p class="text-muted small mb-4">
+                                <i class="bi bi-folder2-open me-1"></i>關聯處分與訴訟歷程：<b class="mono-num">${orgMap[name].cases.length}</b> 筆
+                            </p>
+                            <a href="#/org/${encodeURIComponent(name)}" class="org-card-btn" onclick="onNavClick()">
+                                檢視處分生命週期 <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>`).join('')}
+            </div>`;
+    }
+
+    function renderOrgFlow(container, name) {
+        const org = orgMap[name];
+        if (!org) {
+            container.innerHTML = `<div class="p-4 text-center">找不到組織資料：${name}</div>`;
+            return;
+        }
+        const matters = {};
+        org.cases.forEach(c => { if (!matters[c.matter]) matters[c.matter] = []; matters[c.matter].push(c); });
+
+        const matterOrder = [
+            '核心案件：附隨組織地位認定',
+            '財產處分：不當取得財產移轉與追徵',
+            '特定財產案：美齡樓',
+            '特定財產案：大孝大樓',
+            '特定財產案：國發院土地',
+            '特定財產案：台中市黨部',
+            '裁罰案件：違反黨產條例',
+            '其他程序案件'
+        ];
+
+        container.innerHTML = `
+            <div class="mb-4">
+                <a href="#/" class="btn-touch-back">
+                    <i class="bi bi-arrow-left"></i> 返回全案總覽
+                </a>
+            </div>
+            
+            <div class="mb-4">
+                <span class="text-uppercase fw-bold" style="color: var(--vermilion); font-size: 0.8rem; letter-spacing: 0.08em;">Organization Lifecycle</span>
+                <h1 class="serif-heading fw-bold mt-1 mb-2">${name}</h1>
+                <p class="text-muted small mb-0">處分生命週期圖譜（調查 → 聽證 → 處分 → 司法裁判）</p>
+            </div>
+
+            <div class="lifecycle-timeline">
+                ${matterOrder.filter(m => matters[m]).map(mName => {
+                    const stageInvest = matters[mName].filter(c => c.category_key === 'investigations');
+                    const stageHear = matters[mName].filter(c => c.category_key === 'hearings');
+                    const stageDecision = matters[mName].filter(c => c.category_key === 'administrative_actions');
+                    const stageLitigation = matters[mName].filter(c => c.category_key === 'litigations');
+                    
+                    return `
+                    <div class="matter-section">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+                            <h4 class="matter-title mb-1">${mName}</h4>
+                            <div class="flow-scroll-hint d-lg-none">
+                                <i class="bi bi-arrow-left-right me-1"></i>左右滑動檢視各階段
+                            </div>
+                        </div>
+
+                        <div class="flow-container">
+                            <div class="flow-stage">
+                                <div class="stage-label text-muted">
+                                    <i class="bi bi-search"></i> 01 調查啟動
+                                </div>
+                                ${stageInvest.map(renderMiniCard).join('') || '<div class="text-muted small fst-italic py-2">不適用或併案處理</div>'}
+                            </div>
+                            
+                            <div class="flow-arrow"><i class="bi bi-chevron-right"></i></div>
+
+                            <div class="flow-stage">
+                                <div class="stage-label" style="color: var(--scholar-navy);">
+                                    <i class="bi bi-chat-left-dots"></i> 02 聽證程序
+                                </div>
+                                ${stageHear.map(renderMiniCard).join('') || '<div class="text-muted small fst-italic py-2">無公開聽證紀錄</div>'}
+                            </div>
+
+                            <div class="flow-arrow"><i class="bi bi-chevron-right"></i></div>
+
+                            <div class="flow-stage" style="background: var(--vermilion-subtle); border-color: #F0C4C8;">
+                                <div class="stage-label" style="color: var(--vermilion);">
+                                    <i class="bi bi-hammer"></i> 03 行政處分
+                                </div>
+                                ${stageDecision.map(renderMiniCard).join('') || '<div class="text-muted small fst-italic py-2">處分尚未作成</div>'}
+                            </div>
+
+                            <div class="flow-arrow"><i class="bi bi-chevron-right"></i></div>
+
+                            <div class="flow-stage" style="background: var(--success-subtle); border-color: #C4E2D2;">
+                                <div class="stage-label" style="color: var(--success-green);">
+                                    <i class="bi bi-shield-shaded"></i> 04 司法訴訟
+                                </div>
+                                ${stageLitigation.map(renderMiniCard).join('') || '<div class="text-muted small fst-italic py-2">尚無訴訟紀錄</div>'}
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>`;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderMiniCard(c) {
+        return `
+            <div class="case-card" onclick="location.hash='#/case/${c.id}'">
+                <div class="fw-bold" style="color: var(--ink); line-height: 1.3; font-size: 0.825rem;">
+                    ${c.title}
+                </div>
+                <div class="mt-2">
+                    <span class="status-badge ${c.displayStatus.badgeClass}">
+                        ${c.displayStatus.label}
+                    </span>
+                </div>
+            </div>`;
+    }
+
+    function renderDetail(container, id) {
+        const item = processedData.find(i => i.id === id);
+        if (!item) {
+            container.innerHTML = `<div class="p-4 text-center">找不到案件：${id}</div>`;
+            return;
+        }
+        const protagonists = [...new Set((item.analysis || []).map(a => nameNormalization[a.org_full] || a.org_full))].filter(p => OFFICIAL_ORGS.includes(p));
+        const isLitigation = item.category_key === 'litigations';
+        let contentHTML = "";
+
+        if (isLitigation) {
+            const groupEvents = (events, protagonists) => {
+                const groups = { '處分基礎與共同事件': [] };
+                const plaintiffKeywords = [
+                    { key: '光華投資', label: '光華投資股份有限公司' },
+                    { key: '中廣', label: '中國廣播股份有限公司' },
+                    { key: '中投', label: '中央投資股份有限公司' },
+                    { key: '欣裕台', label: '欣裕台股份有限公司' },
+                    { key: '國民黨', label: '中國國民黨' }
+                ];
+                const sortedEvents = [...(events || [])].sort((a,b) => new Date(a.date) - new Date(b.date));
+                sortedEvents.forEach(e => {
+                    const content = e.caption + e.description;
+                    if (e.caption.includes('作成') || e.caption.includes('釋字') || e.caption.includes('委員會議')) {
+                        groups['處分基礎與共同事件'].push(e);
+                        return;
+                    }
+                    let matches = new Set();
+                    for (const k of plaintiffKeywords) {
+                        if (content.includes(k.key)) matches.add(nameNormalization[k.label] || k.label);
+                    }
+                    for (const p of protagonists) {
+                        if (content.includes(p)) matches.add(nameNormalization[p] || p);
+                    }
+                    if (matches.size > 0) {
+                        matches.forEach(p => {
+                            const l = `原告：${p}`;
+                            if (!groups[l]) groups[l] = [];
+                            groups[l].push(e);
+                        });
+                    } else {
+                        groups['處分基礎與共同事件'].push(e);
+                    }
+                });
+                return groups;
+            };
+
+            const grouped = groupEvents(item.events, protagonists);
+            const plaintiffKeys = Object.keys(grouped).filter(k => k.startsWith('原告：'));
+            const commonEvents = grouped['處分基礎與共同事件'] || [];
+
+            if (plaintiffKeys.length <= 1) {
+                const singleKey = plaintiffKeys[0];
+                const displayEvents = singleKey 
+                    ? [...commonEvents, ...grouped[singleKey]].sort((a,b) => new Date(b.date) - new Date(a.date))
+                    : commonEvents.sort((a,b) => new Date(b.date) - new Date(a.date));
+                const status = singleKey ? analyzeLitigationStatus(grouped[singleKey]) : { label: '程序處理中', badgeClass: 'badge-neutral' };
+                
+                contentHTML = `
+                    <div class="mt-4">
+                        ${singleKey ? `<div class="mb-4 d-flex align-items-center gap-2"><h5 class="fw-bold mb-0 serif-heading">${singleKey}</h5><span class="status-badge ${status.badgeClass}">${status.label}</span></div>` : ''}
+                        ${displayEvents.map(e => `
+                            <div class="timeline-entry ${e.caption.includes('作成') ? 'entry-action' : 'entry-litigation'}">
+                                <span class="timeline-date">${e.date}</span>
+                                <span class="fw-bold" style="color: var(--ink);">${linkifyAdminActions(e.caption)}</span>
+                                <div class="timeline-desc">${linkifyAdminActions(e.description)}</div>
+                            </div>`).join('')}
+                    </div>`;
+            } else {
+                contentHTML = `
+                    ${commonEvents.length > 0 ? `
+                        <div class="mb-4 p-3 bg-light rounded border">
+                            <h6 class="fw-bold serif-heading mb-2">處分基礎與共同事件</h6>
+                            <div class="small">${commonEvents.map(e => `<div class="mb-1"><span class="mono-num fw-bold">${e.date}</span> ${linkifyAdminActions(e.caption)}</div>`).join('')}</div>
+                        </div>` : ''}
+                    <div class="row g-3">${plaintiffKeys.map(k => {
+                        const status = analyzeLitigationStatus(grouped[k]);
+                        return `
+                        <div class="col-12 col-md-6">
+                            <div class="card glass-card p-3 h-100 border-top" style="border-top: 4px solid var(--scholar-navy) !important;">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <h6 class="fw-bold mb-0 serif-heading">${k}</h6>
+                                    <span class="status-badge ${status.badgeClass}">${status.label}</span>
+                                </div>
+                                ${grouped[k].sort((a,b) => new Date(b.date) - new Date(a.date)).map(e => `
+                                    <div class="timeline-entry entry-litigation mb-2">
+                                        <div class="timeline-date">${e.date}</div>
+                                        <div class="fw-bold small">${linkifyAdminActions(e.caption)}</div>
+                                    </div>`).join('')}
+                            </div>
+                        </div>`}).join('')}
+                    </div>`;
+            }
+        } else {
+            contentHTML = `
+                <div class="mt-4">
+                    ${(item.events || []).sort((a,b) => new Date(b.date) - new Date(a.date)).map(e => `
+                        <div class="timeline-entry entry-action">
+                            <span class="timeline-date">${e.date}</span>
+                            <span class="fw-bold" style="color: var(--ink);">${linkifyAdminActions(e.caption)}</span>
+                            <div class="timeline-desc">${linkifyAdminActions(e.description)}</div>
+                        </div>`).join('')}
+                </div>`;
+        }
+
+        container.innerHTML = `
+            <div class="mb-4">
+                <button onclick="history.back()" class="btn-touch-back">
+                    <i class="bi bi-arrow-left"></i> 返回上一頁
+                </button>
+            </div>
+            
+            <div class="glass-card p-3 p-md-4 p-lg-5">
+                <div class="mb-4 d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
+                    <div style="max-width: 100%;">
+                        <div class="mb-2">
+                            <span class="status-badge ${item.displayStatus.badgeClass}">${item.displayStatus.label}</span>
+                            <span class="text-muted small ms-2">${item.category}</span>
+                        </div>
+                        <h2 class="serif-heading fw-bold mb-2">${item.title}</h2>
+                        <div class="text-muted small">
+                            ${item.url ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer" class="text-decoration-none" style="color: var(--scholar-navy)"><i class="bi bi-box-arrow-up-right me-1"></i>官方資料來源</a>` : ''}
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        ${protagonists.map(p => `<span class="protagonist-tag">${p}</span>`).join('')}
+                    </div>
+                </div>
+                <hr style="border-color: var(--rule);">
+                ${contentHTML}
+            </div>`;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    const router = () => {
+        const hash = window.location.hash || '#/';
+        const container = document.getElementById('view-container');
+        if (hash === '#/') renderKPI(container);
+        else if (hash.startsWith('#/org/')) renderOrgFlow(container, decodeURIComponent(hash.split('/').pop()));
+        else if (hash.startsWith('#/case/')) renderDetail(container, hash.split('/').pop());
+        updateSidebar();
+    };
+
+    function updateSidebar() {
+        const nav = document.getElementById('org-nav');
+        const hash = window.location.hash || '#/';
+        
+        const navHome = document.getElementById('nav-home');
+        if (navHome) navHome.classList.toggle('active', hash === '#/');
+        
+        let html = '';
+        OFFICIAL_ORGS.filter(o => orgMap[o]).forEach(o => {
+            const active = hash.includes(encodeURIComponent(o));
+            html += `
+                <li class="nav-item">
+                    <a class="nav-link ${active ? 'active' : ''}" href="#/org/${encodeURIComponent(o)}" onclick="onNavClick()">
+                        <i class="bi bi-building me-2"></i>${o.substring(0, 10)}${o.length > 10 ? '…' : ''}
+                    </a>
+                </li>`;
+        });
+        if (nav) nav.innerHTML = html;
+    }
+
+    const routerWithMobile = () => {
+        router();
+        if (window.innerWidth < 992) {
+            document.getElementById('sidebar').classList.remove('active');
+        }
+    };
+
+    window.addEventListener('hashchange', routerWithMobile);
+    window.addEventListener('load', routerWithMobile);
+</script>
+</body>
+</html>

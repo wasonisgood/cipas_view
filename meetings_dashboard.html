@@ -38,23 +38,52 @@
         .timeline-mini { border-left: 2px solid #e2e8f0; padding-left: 1rem; margin-left: 0.5rem; }
         .related-item { font-size: 0.85rem; display: block; text-decoration: none; color: #1e40af; padding: 4px 0; }
         .related-item:hover { text-decoration: underline; }
+
+        /* Mobile RWD */
+        .mobile-header { display: none; background: var(--primary); color: white; padding: 0.75rem 1rem; position: sticky; top: 0; z-index: 1040; align-items: center; justify-content: space-between; }
+        .mobile-toggle-btn { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); color: #FFF; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 1.25rem; cursor: pointer; }
+        #sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 995; }
+        .sidebar-close-btn { display: none; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; background: transparent; color: #FFF; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; cursor: pointer; }
+
+        @media (max-width: 991.98px) {
+            #sidebar { transform: translateX(-100%); transition: transform 0.3s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.3); z-index: 1050; }
+            #sidebar.active { transform: translateX(0); }
+            #sidebar.active + #sidebar-backdrop { display: block; }
+            #main-content { margin-left: 0; padding: 1.25rem 1rem; }
+            .mobile-header { display: flex !important; }
+            .sidebar-close-btn { display: inline-flex; }
+        }
+        @media (max-width: 575.98px) {
+            #main-content { padding: 1rem 0.5rem; }
+            .nav-link { min-height: 44px; display: flex; align-items: center; }
+        }
     </style>
 </head>
 <body>
 
+<div class="mobile-header">
+    <div class="d-flex align-items-center"><i class="bi bi-journal-bookmark fs-4 me-2 text-primary"></i><span class="fw-bold">CIPAS 決策審計</span></div>
+    <button class="mobile-toggle-btn" onclick="toggleSidebar()" aria-label="切換選單"><i class="bi bi-list"></i></button>
+</div>
+
 <nav id="sidebar">
-    <div class="mb-5 px-2">
-        <h4 class="fw-bold"><i class="bi bi-cpu-fill me-2"></i>CIPAS Intelligence</h4>
-        <small class="text-slate-400">決策審計與人名關聯系統</small>
+    <div class="d-flex align-items-center justify-content-between mb-4 px-2">
+        <div>
+            <h4 class="fw-bold mb-0"><i class="bi bi-journal-bookmark me-2"></i>CIPAS</h4>
+            <small class="text-slate-400">決策審計與人名關聯系統</small>
+        </div>
+        <button class="sidebar-close-btn" onclick="toggleSidebar()"><i class="bi bi-x-lg"></i></button>
     </div>
     <ul class="nav flex-column">
-        <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="bi bi-arrow-left-circle me-2"></i> 案件儀表板</a></li>
-        <li class="nav-item"><a class="nav-link" id="nav-list" href="#/list"><i class="bi bi-table me-2"></i> 會議清單</a></li>
-        <li class="nav-item"><a class="nav-link" id="nav-members" href="#/members"><i class="bi bi-people me-2"></i> 委員出席庫</a></li>
-        <li class="nav-item"><a class="nav-link" id="nav-audit" href="#/audit"><i class="bi bi-bank me-2"></i> 財政動支審計</a></li>
-        <li class="nav-item"><a class="nav-link" id="nav-org-budget" href="#/org-budget"><i class="bi bi-calendar-range me-2"></i> 組織預算追蹤</a></li>
+        <li class="nav-item"><a class="nav-link" href="dashboard.html" onclick="onNav()"><i class="bi bi-arrow-left-circle me-2"></i> 處分儀表板</a></li>
+        <li class="nav-item"><a class="nav-link" id="nav-list" href="#/list" onclick="onNav()"><i class="bi bi-table me-2"></i> 會議清單</a></li>
+        <li class="nav-item"><a class="nav-link" id="nav-members" href="#/members" onclick="onNav()"><i class="bi bi-people me-2"></i> 委員出席庫</a></li>
+        <li class="nav-item"><a class="nav-link" id="nav-audit" href="#/audit" onclick="onNav()"><i class="bi bi-bank me-2"></i> 財政動支審計</a></li>
+        <li class="nav-item"><a class="nav-link" id="nav-org-budget" href="#/org-budget" onclick="onNav()"><i class="bi bi-calendar-range me-2"></i> 組織預算追蹤</a></li>
     </ul>
 </nav>
+
+<div id="sidebar-backdrop" onclick="toggleSidebar()"></div>
 
 <main id="main-content">
     <div id="view-container"></div>
@@ -70,6 +99,15 @@
 <script src="meetings_data.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
+    }
+    function onNav() {
+        if (window.innerWidth < 992) {
+            document.getElementById('sidebar').classList.remove('active');
+        }
+    }
+
     const allData = typeof meetingsData !== 'undefined' ? meetingsData : [];
     const memberStats = {};
     const parsedCache = new Map();
