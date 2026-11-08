@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIPAS 全生命週期監控系統 (深度績效版)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root { --sidebar-width: 280px; }
+        body { background-color: #f8f9fa; font-family: "Inter", "Microsoft JhengHei", sans-serif; overflow-x: hidden; }
+        #sidebar { width: var(--sidebar-width); position: fixed; height: 100vh; background: #1a1d20; color: white; padding: 1.5rem; overflow-y: auto; z-index: 1050; transition: all 0.3s; }
+        #main-content { margin-left: var(--sidebar-width); padding: 2rem; min-height: 100vh; transition: all 0.3s; }
+        
+        /* RWD Sidebar */
+        @media (max-width: 992px) {
+            #sidebar { margin-left: calc(var(--sidebar-width) * -1); }
+            #sidebar.active { margin-left: 0; }
+            #main-content { margin-left: 0; padding: 1rem; }
+            .mobile-header { display: flex !important; }
+        }
+
+        .mobile-header { display: none; background: #1a1d20; color: white; padding: 1rem; position: sticky; top: 0; z-index: 1040; align-items: center; justify-content: space-between; }
+        .glass-card { background: white; border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .kpi-card { border-left: 5px solid #0d6efd; transition: transform 0.2s; }
+        
+        .matter-section { background: white; border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem; border: 1px solid #e9ecef; }
+        .matter-title { font-weight: 800; color: #1a1d20; border-left: 5px solid #0d6efd; padding-left: 15px; margin-bottom: 1.5rem; font-size: 1.25rem; }
+        .flow-container { display: flex; align-items: stretch; gap: 0.75rem; overflow-x: auto; padding-bottom: 1rem; -webkit-overflow-scrolling: touch; }
+        .flow-stage { flex: 1; min-width: 260px; background: #f8f9fa; border-radius: 12px; padding: 1rem; border: 1px dashed #dee2e6; }
+        
+        .search-box { background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 8px; padding: 0.5rem 1rem; width: 100%; margin-bottom: 1.5rem; }
+        .search-box:focus { background: rgba(255,255,255,0.2); outline: none; color: white; }
+        
+        .case-card { background: white; border-radius: 8px; padding: 0.8rem; margin-bottom: 0.6rem; border: 1px solid #dee2e6; cursor: pointer; transition: all 0.2s; }
+        .nav-link { color: #adb5bd; border-radius: 8px; margin-bottom: 0.4rem; display: flex; align-items: center; }
+        .nav-link:hover, .nav-link.active { background: #343a40; color: white; }
+        .nav-link i { width: 20px; text-align: center; }
+        
+        .detail-header-text { max-width: 100%; }
+        @media (min-width: 992px) { .detail-header-text { max-width: calc(100% - 340px); } }
+    </style>
+</head>
+<body>
+
+<div class="mobile-header">
+    <div class="d-flex align-items-center"><i class="bi bi-shield-shaded fs-4 me-2"></i><span class="fw-bold">CIPAS View</span></div>
+    <button class="btn btn-dark" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+</div>
+
+<nav id="sidebar">
+    <div class="mb-4 d-none d-lg-flex align-items-center"><i class="bi bi-shield-shaded fs-3 me-2 text-primary"></i><h4 class="fw-bold mb-0">CIPAS</h4></div>
+    
+    <input type="text" id="global-search" class="search-box" placeholder="搜尋案件、處分、原告..." onkeyup="handleSearch(event)">
+
+    <ul class="nav flex-column" id="main-nav">
+        <li class="nav-item"><a class="nav-link" id="nav-home" href="#/"><i class="bi bi-speedometer2 me-2"></i>概覽</a></li>
+        <li class="nav-item"><a class="nav-link" href="stats.html"><i class="bi bi-graph-up-arrow me-2"></i>數據統計庫</a></li>
+        <li class="nav-item"><a class="nav-link" href="meetings_dashboard.html"><i class="bi bi-journal-text me-2"></i>會議紀錄智庫</a></li>
+    </ul>
+
+    <div class="small text-muted mt-4 mb-2 px-3 text-uppercase">組織生命週期</div>
+    <ul class="nav flex-column" id="org-nav"></ul>
+</nav>
+
+<main id="main-content">
+    <div id="view-container"></div>
+</main>
+
+<script src="cipas_full_data.js"></script>
+<script>
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+    
+    function handleSearch(e) {
+        if (e.key === 'Enter') {
+            const query = e.target.value.trim();
+            if (query) {
+                const results = processedData.filter(item => 
+                    item.title.includes(query) || 
+                    item.events.some(ev => (ev.caption + ev.description).includes(query))
+                );
+                renderSearchResults(results, query);
+            }
+        }
+    }
+
+    function renderSearchResults(results, query) {
+        const container = document.getElementById('view-container');
+        container.innerHTML = `
+            <div class="mb-4"><button onclick="location.hash='#/'" class="btn btn-link p-0 text-muted text-decoration-none">← 返回概覽</button></div>
+            <h3 class="fw-bold mb-4">搜尋結果: "${query}" <span class="badge bg-primary fs-6">${results.length}</span></h3>
+            <div class="row g-3">
+                ${results.map(item => `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card glass-card p-3 h-100 case-card" onclick="location.hash='#/case/${item.id}'">
+                            <span class="badge ${item.displayStatus.class} mb-2" style="width:fit-content">${item.displayStatus.label}</span>
+                            <h6 class="fw-bold">${item.title}</h6>
+                            <p class="text-muted small mb-0">${item.category}</p>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>`;
+        if (window.innerWidth < 992) toggleSidebar();
+    }
+    const allData = typeof cipasFullData !== 'undefined' ? cipasFullData : [];
+    
+    const OFFICIAL_ORGS = [
+        '中國國民黨', '中華民國婦女聯合會', '中國廣播股份有限公司', 
+        '中央投資股份有限公司', '欣裕台股份有限公司', '中影股份有限公司', 
+        '社團法人中國青年救國團', '中華救助總會', '財團法人民生建設基金會',
+        '財團法人民族基金會', '財團法人民權基金會', '財團法人國家發展基金會',
+        '欣光華股份有限公司', '光華投資股份有限公司'
+    ];
+
+    const nameNormalization = {
+        '婦聯會': '中華民國婦女聯合會',
+        '中華民國婦女聯合會': '中華民國婦女聯合會',
+        '中廣': '中國廣播股份有限公司',
+        '中國廣播公司': '中國廣播股份有限公司',
+        '中國廣播股份有限公司': '中國廣播股份有限公司',
+        '中投': '中央投資股份有限公司',
+        '中央投資公司': '中央投資股份有限公司',
+        '中央投資股份有限公司': '中央投資股份有限公司',
+        '欣裕台': '欣裕台股份有限公司',
+        '欣裕台公司': '欣裕台股份有限公司',
+        '欣裕台股份有限公司': '欣裕台股份有限公司',
+        '光華投資': '光華投資股份有限公司',
+        '光華投資公司': '光華投資股份有限公司',
+        '光華投資股份有限公司': '光華投資股份有限公司',
+        '國民黨': '中國國民黨',
+        '中國國民黨': '中國國民黨',
+        '救總': '中華救助總會',
+        '中華救助總會': '中華救助總會',
+        '救助總會': '中華救助總會'
+    };
+
+    function getMatterCategory(title) {
+        const t = title;
+        if (t.includes('美齡樓')) return '特定財產案：美齡樓';
+        if (t.includes('大孝大樓')) return '特定財產案：大孝大樓';
+        if (t.includes('國發院')) return '特定財產案：國發院土地';
+        if (t.includes('台中市黨部')) return '特定財產案：台中市黨部';
+        if (t.includes('罰鍰')) return '裁罰案件：違反黨產條例';
+        if (t.includes('附隨組織') || OFFICIAL_ORGS.some(org => t === org + '案' || t === org + '調查案') || (t.includes('中央投資') && t.includes('欣裕台') && !t.includes('股權'))) {
+            return '核心案件：附隨組織地位認定';
+        }
+        if (t.includes('移轉國有') || t.includes('不當取得財產') || t.includes('追徵') || t.includes('股權')) {
+            return '財產處分：不當取得財產移轉與追徵';
+        }
+        return '其他程序案件';
+    }
+
+    function analyzeLitigationStatus(events) {
+        if (!events || events.length === 0) return { label: '無進度', class: 'bg-secondary text-white', score: 0 };
+        const sorted = [...events].sort((a,b) => new Date(b.date) - new Date(a.date));
+        const latest = sorted[0];
+        const latestFull = (latest.caption + latest.description);
+        if (latestFull.includes('最高行政法院')) {
+            if (latestFull.includes('駁回') || latestFull.includes('確定')) return { label: '處分獲永久維持 (定讞)', class: 'bg-success text-white', score: 100 };
+            if (latestFull.includes('撤銷原處分')) return { label: '處分遭永久撤銷 (定讞)', class: 'bg-danger text-white', score: -100 };
+            if (latestFull.includes('發回') || latestFull.includes('更審')) return { label: '法院發回更審', class: 'bg-warning text-dark', score: 50 };
+        }
+        if (latest.caption.includes('提起上訴') && !latest.caption.includes('駁回')) return { label: '上訴審理中', class: 'bg-primary text-white', score: 40 };
+        if (latestFull.includes('原告之訴駁回')) return { label: '處分獲司法維持 (一審)', class: 'bg-success text-white', score: 80 };
+        if (latestFull.includes('原處分撤銷')) return { label: '處分遭司法撤銷 (一審)', class: 'bg-danger text-white', score: -80 };
+        return { label: '司法審理中', class: 'bg-primary text-white', score: 30 };
+    }
+
+    function analyzeItem(item) {
+        let status = { label: '處理中', class: 'bg-secondary text-white', score: 0 };
+        if (item.category_key === 'litigations') {
+            const litStatus = analyzeLitigationStatus(item.events);
+            if (litStatus.score >= 80) status = { label: '處分獲維持', class: 'bg-success text-white', score: 1 };
+            else if (litStatus.score < 0) status = { label: '效力受挫', class: 'bg-danger text-white', score: -1 };
+            else status = { label: '司法攻防中', class: 'bg-primary text-white', score: 0 };
+        } else if (item.category_key === 'administrative_actions') {
+            status = { label: '處分已作成', class: 'bg-danger text-white', score: 1 };
+        }
+        return { ...item, displayStatus: status, matter: getMatterCategory(item.title) };
+    }
+
+    const processedData = allData.map(analyzeItem);
+    const orgMap = {};
+    processedData.forEach(item => {
+        let targets = [...item.analysis.map(a => nameNormalization[a.org_full] || a.org_full)];
+        if (item.title.includes('美齡樓')) targets.push('中華民國婦女聯合會');
+        if (item.title.includes('大孝大樓') || item.title.includes('國發院') || item.title.includes('台中市黨部')) targets.push('中國國民黨');
+        if (item.title.includes('中廣')) targets.push('中國廣播股份有限公司');
+        [...new Set(targets)].forEach(org => {
+            if (OFFICIAL_ORGS.includes(org)) {
+                if (!orgMap[org]) orgMap[org] = { name: org, cases: [] };
+                if (!orgMap[org].cases.find(c => c.id === item.id)) orgMap[org].cases.push(item);
+            }
+        });
+    });
+
+    function linkifyAdminActions(text) {
+        const regex = /黨產處字第(\d+)號/g;
+        return text.replace(regex, (match, no) => {
+            const target = allData.find(d => d.category_key === 'administrative_actions' && d.title.includes(no));
+            if (target) return `<a href="#/case/${target.id}" class="admin-action-link"><i class="bi bi-link-45deg"></i>${match}</a>`;
+            return match;
+        });
+    }
+
+    function renderKPI(container) {
+        const lits = processedData.filter(i => i.category_key === 'litigations');
+        const totalWon = lits.filter(i => i.displayStatus.score === 1).length;
+        const totalLost = lits.filter(i => i.displayStatus.score === -1).length;
+        const orders = processedData.filter(i => i.hasOrder || i.category_key === 'administrative_actions').length;
+        const stabilityRate = (totalWon + totalLost) > 0 ? Math.round(totalWon / (totalWon + totalLost) * 100) : 0;
+
+        container.innerHTML = `
+            <h1 class="fw-bold mb-4">黨產處分司法防線儀錶板</h1>
+            <div class="row g-4 mb-5">
+                <div class="col-md-3"><div class="card glass-card kpi-card p-4">
+                    <small class="text-muted text-uppercase fw-bold">處分成果</small>
+                    <h2 class="display-6 fw-bold mb-0">${orders} <span class="fs-6 text-primary">項作成</span></h2>
+                </div></div>
+                <div class="col-md-3"><div class="card glass-card kpi-card p-4" style="border-left-color: #198754;">
+                    <small class="text-muted text-uppercase fw-bold">司法防線穩固</small>
+                    <h2 class="display-6 fw-bold mb-0">${totalWon} <span class="fs-6 text-success">案維持</span></h2>
+                </div></div>
+                <div class="col-md-3"><div class="card glass-card kpi-card p-4" style="border-left-color: #dc3545;">
+                    <small class="text-muted text-uppercase fw-bold">司法撤銷受挫</small>
+                    <h2 class="display-6 fw-bold mb-0">${totalLost} <span class="fs-6 text-danger">案撤銷</span></h2>
+                </div></div>
+                <div class="col-md-3"><div class="card glass-card kpi-card p-4" style="border-left-color: #0dcaf0;">
+                    <small class="text-muted text-uppercase fw-bold">整體維持率</small>
+                    <h2 class="display-6 fw-bold mb-0">${stabilityRate}% <span class="fs-6 text-info">法理穩固</span></h2>
+                </div></div>
+            </div>
+            <div class="row g-4">
+                ${OFFICIAL_ORGS.filter(name => orgMap[name]).map(name => `
+                    <div class="col-md-4">
+                        <div class="card glass-card p-3 h-100">
+                            <h5 class="fw-bold">${name}</h5><p class="text-muted small">關聯處分與程序：${orgMap[name].cases.length} 筆</p>
+                            <a href="#/org/${encodeURIComponent(name)}" class="btn btn-sm btn-outline-primary mt-auto">查看處分生命週期</a>
+                        </div>
+                    </div>`).join('')}
+            </div>`;
+    }
+
+    function renderOrgFlow(container, name) {
+        const org = orgMap[name];
+        if (!org) return;
+        const matters = {};
+        org.cases.forEach(c => { if (!matters[c.matter]) matters[c.matter] = []; matters[c.matter].push(c); });
+
+        const matterOrder = [
+            '核心案件：附隨組織地位認定',
+            '財產處分：不當取得財產移轉與追徵',
+            '特定財產案：美齡樓',
+            '特定財產案：大孝大樓',
+            '特定財產案：國發院土地',
+            '特定財產案：台中市黨部',
+            '裁罰案件：違反黨產條例',
+            '其他程序案件'
+        ];
+
+        container.innerHTML = `
+            <div class="mb-3"><a href="#/" class="text-decoration-none text-muted"><i class="bi bi-arrow-left"></i> 返回概覽</a></div>
+            <h1 class="fw-bold mb-5">${name} 處分生命週期圖譜</h1>
+            <div class="lifecycle-timeline">
+                ${matterOrder.filter(m => matters[m]).map(mName => {
+                    const stageInvest = matters[mName].filter(c => c.category_key === 'investigations');
+                    const stageHear = matters[mName].filter(c => c.category_key === 'hearings');
+                    const stageDecision = matters[mName].filter(c => c.category_key === 'administrative_actions');
+                    const stageLitigation = matters[mName].filter(c => c.category_key === 'litigations');
+                    
+                    return `
+                    <div class="matter-section">
+                        <h4 class="matter-title">${mName}</h4>
+                        <div class="flow-container">
+                            <div class="flow-stage">
+                                <div class="stage-label text-muted"><i class="bi bi-search"></i> 01 調查啟動</div>
+                                ${stageInvest.map(renderMiniCard).join('') || '<div class="text-muted small italic">不適用或併案</div>'}
+                            </div>
+                            <div class="flow-arrow"><i class="bi bi-chevron-right"></i></div>
+                            <div class="flow-stage">
+                                <div class="stage-label text-info"><i class="bi bi-chat-left-dots"></i> 02 聽證程序</div>
+                                ${stageHear.map(renderMiniCard).join('') || '<div class="text-muted small italic">無公開聽證紀錄</div>'}
+                            </div>
+                            <div class="flow-arrow"><i class="bi bi-chevron-right"></i></div>
+                            <div class="flow-stage" style="background: #fff5f5; border-color: #feb2b2;">
+                                <div class="stage-label text-danger"><i class="bi bi-hammer"></i> 03 行政處分</div>
+                                ${stageDecision.map(renderMiniCard).join('') || '<div class="text-muted small italic">處分尚未作成</div>'}
+                            </div>
+                            <div class="flow-arrow"><i class="bi bi-chevron-right"></i></div>
+                            <div class="flow-stage" style="background: #f0f7ff; border-color: #bee3f8;">
+                                <div class="stage-label text-primary"><i class="bi bi-shield-shaded"></i> 04 司法訴訟</div>
+                                ${stageLitigation.map(renderMiniCard).join('') || '<div class="text-muted small italic">尚無訴訟紀錄</div>'}
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>`;
+    }
+
+    function renderMiniCard(c) {
+        return `<div class="case-card shadow-sm p-2 mb-2" onclick="location.hash='#/case/${c.id}'" style="border-radius:6px; font-size:0.75rem;">
+            <div class="fw-bold" style="color:#2d3748; line-height:1.2;">${c.title}</div>
+            <span class="status-badge ${c.displayStatus.class} mt-1" style="font-size:0.55rem; display:inline-block;">${c.displayStatus.label}</span>
+        </div>`;
+    }
+
+    function renderDetail(container, id) {
+        const item = processedData.find(i => i.id === id);
+        if (!item) return;
+        const protagonists = [...new Set(item.analysis.map(a => nameNormalization[a.org_full] || a.org_full))].filter(p => OFFICIAL_ORGS.includes(p));
+        const isLitigation = item.category_key === 'litigations';
+        let contentHTML = "";
+        if (isLitigation) {
+            // ... [訴訟頁面邏輯] ...
+            const groupEvents = (events, protagonists) => {
+                const groups = { '處分基礎與共同事件': [] };
+                const plaintiffKeywords = [{ key: '光華投資', label: '光華投資股份有限公司' }, { key: '中廣', label: '中國廣播股份有限公司' }, { key: '中投', label: '中央投資股份有限公司' }, { key: '欣裕台', label: '欣裕台股份有限公司' }, { key: '國民黨', label: '中國國民黨' }];
+                const sortedEvents = [...events].sort((a,b) => new Date(a.date) - new Date(a.date));
+                sortedEvents.forEach(e => {
+                    const content = e.caption + e.description;
+                    if (e.caption.includes('作成') || e.caption.includes('釋字') || e.caption.includes('委員會議')) { groups['處分基礎與共同事件'].push(e); return; }
+                    let matches = new Set();
+                    for (const k of plaintiffKeywords) if (content.includes(k.key)) matches.add(nameNormalization[k.label] || k.label);
+                    for (const p of protagonists) if (content.includes(p)) matches.add(nameNormalization[p] || p);
+                    if (matches.size > 0) matches.forEach(p => { const l = `原告：${p}`; if(!groups[l]) groups[l]=[]; groups[l].push(e); });
+                    else groups['處分基礎與共同事件'].push(e);
+                });
+                return groups;
+            };
+            const grouped = groupEvents(item.events, protagonists);
+            const plaintiffKeys = Object.keys(grouped).filter(k => k.startsWith('原告：'));
+            const commonEvents = grouped['處分基礎與共同事件'] || [];
+
+            if (plaintiffKeys.length <= 1) {
+                const singleKey = plaintiffKeys[0];
+                const displayEvents = singleKey 
+                    ? [...commonEvents, ...grouped[singleKey]].sort((a,b) => new Date(b.date) - new Date(a.date))
+                    : commonEvents.sort((a,b) => new Date(b.date) - new Date(a.date));
+                const status = singleKey ? analyzeLitigationStatus(grouped[singleKey]) : { label: '程序處理中', class: 'bg-secondary text-white' };
+                
+                contentHTML = `
+                    <div class="mt-4">
+                        ${singleKey ? `<div class="mb-4"><h6 class="fw-bold">${singleKey}</h6><span class="badge ${status.class}">${status.label}</span></div>` : ''}
+                        ${displayEvents.map(e => `
+                            <div class="mb-3 border-start ps-3 border-3 ${e.caption.includes('作成') ? 'border-danger' : 'border-primary'}">
+                                <b>${e.date}</b> ${linkifyAdminActions(e.caption)}
+                                <div class="text-muted small mt-1">${linkifyAdminActions(e.description)}</div>
+                            </div>`).join('')}
+                    </div>`;
+            } else {
+                contentHTML = `
+                    ${commonEvents.length > 0 ? `<div class="mb-4 p-3 bg-light rounded border"><h6>處分基礎與共同事件</h6><div class="small">${commonEvents.map(e => `<div>${e.date} ${linkifyAdminActions(e.caption)}</div>`).join('')}</div></div>` : ''}
+                    <div class="row g-3">${plaintiffKeys.map(k => {
+                        const status = analyzeLitigationStatus(grouped[k]);
+                        return `
+                        <div class="col-md-6"><div class="card p-3 h-100 shadow-sm border-top border-primary border-4">
+                            <h6 class="fw-bold mb-1">${k}</h6><span class="badge ${status.class} mb-3" style="width:fit-content">${status.label}</span>
+                            ${grouped[k].sort((a,b) => new Date(b.date) - new Date(a.date)).map(e => `<div class="small border-start ps-2 mb-2"><b>${e.date}</b><br>${linkifyAdminActions(e.caption)}</div>`).join('')}
+                        </div></div>`}).join('')}
+                    </div>`;
+            }
+        } else {
+            contentHTML = `<div class="mt-4">${item.events.sort((a,b) => new Date(b.date) - new Date(a.date)).map(e => `<div class="mb-3 border-start ps-3 border-3"><b>${e.date}</b> ${linkifyAdminActions(e.caption)}<div class="text-muted small mt-1">${linkifyAdminActions(e.description)}</div></div>`).join('')}</div>`;
+        }
+        container.innerHTML = `<div class="mb-4"><button onclick="history.back()" class="btn btn-link p-0 text-muted text-decoration-none">← 返回</button></div>
+            <div class="card glass-card p-4 p-md-5 position-relative">
+                <div class="mb-4 d-flex flex-column flex-lg-row justify-content-between align-items-start">
+                    <div class="detail-header-text">
+                        <span class="badge ${item.displayStatus.class} mb-2">${item.displayStatus.label}</span>
+                        <h2 class="fw-bold">${item.title}</h2>
+                        <p class="text-muted small">${item.category} | <a href="${item.url}" target="_blank">官方連結</a></p>
+                    </div>
+                    <div class="mt-3 mt-lg-0 d-flex flex-column align-items-lg-end">
+                        ${protagonists.map(p => `<span class="protagonist-tag shadow-sm mb-2">${p}</span>`).join('')}
+                    </div>
+                </div>
+                <hr>${contentHTML}</div>`;
+    }
+
+    const router = () => {
+        const hash = window.location.hash || '#/';
+        const container = document.getElementById('view-container');
+        if (hash === '#/') renderKPI(container);
+        else if (hash.startsWith('#/org/')) renderOrgFlow(container, decodeURIComponent(hash.split('/').pop()));
+        else if (hash.startsWith('#/case/')) renderDetail(container, hash.split('/').pop());
+        updateSidebar();
+    };
+
+    function updateSidebar() {
+        const nav = document.getElementById('org-nav');
+        const hash = window.location.hash || '#/';
+        
+        document.getElementById('nav-home').classList.toggle('active', hash === '#/');
+        
+        let html = '';
+        OFFICIAL_ORGS.filter(o => orgMap[o]).forEach(o => {
+            const active = hash.includes(encodeURIComponent(o));
+            html += `<li class="nav-item"><a class="nav-link ${active?'active':''}" href="#/org/${encodeURIComponent(o)}" onclick="if(window.innerWidth < 992) toggleSidebar()"><i class="bi bi-building me-2"></i>${o.substring(0,12)}</a></li>`;
+        });
+        nav.innerHTML = html;
+    }
+
+    // Wrap the existing router to close sidebar on navigation in mobile
+    const originalRouter = router;
+    const routerWithMobile = () => {
+        originalRouter();
+        if (window.innerWidth < 992) {
+            document.getElementById('sidebar').classList.remove('active');
+        }
+    };
+    window.removeEventListener('hashchange', router);
+    window.removeEventListener('load', router);
+    window.addEventListener('hashchange', routerWithMobile);
+    window.addEventListener('load', routerWithMobile);
+</script>
+</body>
+</html>
